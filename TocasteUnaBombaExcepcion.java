@@ -5,11 +5,10 @@
  */
 
 public class TocasteUnaBombaExcepcion extends Exception {
-private static final long serialVersionUID = 42l;
 
-public TocasteUnaBombaExcepcion(String a){
-	super(a);
+    private static final long serialVersionUID = 42l;
+
+    public TocasteUnaBombaExcepcion(String a) {
+        super(a);
+    }
 }
-
-}
-
