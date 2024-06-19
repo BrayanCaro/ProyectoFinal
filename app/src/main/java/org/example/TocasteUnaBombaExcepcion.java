@@ -3,6 +3,7 @@
  * @author Brayan Martinez Santana
  * @version @version Primera version, Lunes 3 de Diciembre, 2018
  */
+package org.example;
 
 public class TocasteUnaBombaExcepcion extends Exception {
 

@@ -4,6 +4,7 @@
  * @author Brayan Martinez Santana y Jose Luis García Santamaria
  * @version Primera version, Sabado 8 de Diciembre, 2018
  */
+package org.example;
 
 import java.io.*;
 import java.util.Scanner;

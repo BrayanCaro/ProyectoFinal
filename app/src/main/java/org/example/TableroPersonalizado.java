@@ -5,6 +5,7 @@
  * @version Primera version, Domingo 2 de Diciembre, 2018
  * @see Tablero
  */
+package org.example;
 
 import java.io.*;
 
