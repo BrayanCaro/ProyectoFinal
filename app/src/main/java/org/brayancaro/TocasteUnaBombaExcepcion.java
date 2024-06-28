@@ -3,13 +3,13 @@
  * @author Brayan Martinez Santana
  * @version @version Primera version, Lunes 3 de Diciembre, 2018
  */
+package org.brayancaro;
 
 public class TocasteUnaBombaExcepcion extends Exception {
-private static final long serialVersionUID = 42l;
 
-public TocasteUnaBombaExcepcion(String a){
-	super(a);
+    private static final long serialVersionUID = 42l;
+
+    public TocasteUnaBombaExcepcion(String a) {
+        super(a);
+    }
 }
-
-}
-
