@@ -25,12 +25,6 @@ public class Menu {
 
     protected Scanner scanner;
 
-    public Menu setScanner(Scanner scanner) {
-        this.scanner = scanner;
-
-        return this;
-    }
-
     public static void main(String[] args) throws ComandoErroneoExcepcion, Exception {
         try (var scanner = new Scanner(System.in)) {
             new Menu().setScanner(scanner).play();
@@ -58,6 +52,12 @@ public class Menu {
                 }
             }
         } while (ayuda && opcion != 4);
+    }
+
+    public Menu setScanner(Scanner scanner) {
+        this.scanner = scanner;
+
+        return this;
     }
 
     /**
