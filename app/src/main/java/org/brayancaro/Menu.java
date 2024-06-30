@@ -6,53 +6,58 @@
  */
 package org.brayancaro;
 
-import java.io.*;
-import java.lang.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Menu {
 
-    private static Scanner io;
     private static TableroPersonalizado tableroEstatico;
     private static String[][] datos = new String[20][4];
     private static boolean ayuda = true;
     static MiHilo hola = new MiHilo("hola");
     static Thread cronometro = new Thread(hola);
 
-    public static void main(String[] args) {
-        int opcion;
-        io = new Scanner(System.in);
-        try {
-            do {
-                menu();
-                opcion = Integer.parseInt(new Scanner(System.in).next());
-                if (ayuda) {
-                    realizarAccion(opcion);
-                }
-            } while (ayuda && opcion != 4);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e);
-            System.out.println("Escribe solo un numero del 1 al 3\n");
-            main(args);
-        } catch (TocasteUnaBombaExcepcion e) {
-            tableroEstatico.mostrarTodasLasBombas();
-            System.out.println("\033[33m" + tableroEstatico + "\033[0m");
-            System.out.println(
-                tableroEstatico.centrar() +
-                " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
-            );
-            try {
-                cronometro.interrupt();
-            } catch (IllegalThreadStateException ee) {}
-            main(args);
-        } catch (InputMismatchException e) {
-            System.out.println("Escribe solo un numero del 1 al 3\n");
-            main(args);
-        } catch (Exception e) {
-            System.out.println(e);
-            main(args);
+    protected Scanner scanner;
+
+    public static void main(String[] args) throws ComandoErroneoExcepcion, Exception {
+        try (var scanner = new Scanner(System.in)) {
+            new Menu().setScanner(scanner).play();
         }
+    }
+
+    public void play() throws ComandoErroneoExcepcion, Exception {
+        int opcion;
+        do {
+            menu();
+            opcion = Integer.parseInt(scanner.next());
+            if (ayuda) {
+                try {
+                    realizarAccion(opcion);
+                } catch (TocasteUnaBombaExcepcion e) {
+                    tableroEstatico.mostrarTodasLasBombas();
+                    System.out.println("\033[33m" + tableroEstatico + "\033[0m");
+                    System.out.println(
+                            tableroEstatico.centrar() +
+                            " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
+                            );
+                    try {
+                        cronometro.interrupt();
+                    } catch (IllegalThreadStateException ee) {}
+                }
+            }
+        } while (ayuda && opcion != 4);
+    }
+
+    public Menu setScanner(Scanner scanner) {
+        this.scanner = scanner;
+
+        return this;
     }
 
     /**
@@ -72,12 +77,12 @@ public class Menu {
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
      * @param opcion -- Indica la opcion a realizar
      */
-    public static void realizarAccion(int opciones)
+    public void realizarAccion(int opciones)
         throws TocasteUnaBombaExcepcion, ComandoErroneoExcepcion, Exception {
         switch (opciones) {
             case 1:
                 System.out.print("¿Con cuantas filas? ");
-                int filas = Integer.parseInt(new Scanner(System.in).next());
+                int filas = Integer.parseInt(scanner.next());
 
                 try {
                     if (filas < 8) {
@@ -100,7 +105,7 @@ public class Menu {
                 }
 
                 System.out.print("¿Con cuantas columnas? ");
-                int columnas = Integer.parseInt(new Scanner(System.in).next());
+                int columnas = Integer.parseInt(scanner.next());
                 try {
                     if (columnas < 8) {
                         throw new IllegalArgumentException(
@@ -118,7 +123,7 @@ public class Menu {
                 }
 
                 System.out.print("¿Con cuantas bombas? ");
-                int bombas = Integer.parseInt(new Scanner(System.in).next());
+                int bombas = Integer.parseInt(scanner.next());
 
                 TableroPersonalizado tableroDelUsuario;
 
@@ -152,7 +157,7 @@ public class Menu {
                 } catch (Exception e) {}
                 do {
                     System.out.print("Introduce la cordenada > ");
-                    String comando = new Scanner(System.in).nextLine();
+                    String comando = scanner.nextLine();
                     comando.trim();
                     if (comando.contains(" ")) {
                         try {
@@ -184,7 +189,7 @@ public class Menu {
                             System.out.print(
                                 "¿Quieres marcar o ver esa celda? (m/v) "
                             );
-                            comando = new Scanner(System.in).nextLine();
+                            comando = scanner.nextLine();
                             comando.trim().toLowerCase();
 
                             if (comando.contains("m")) {
@@ -248,16 +253,12 @@ public class Menu {
                             System.out.print(
                                 "¿Quieres guardar tu partida? (s/n) "
                             );
-                            String guardarPartida = new Scanner(
-                                System.in
-                            ).nextLine();
+                            String guardarPartida = scanner.nextLine();
                             guardarPartida.toLowerCase();
 
                             if (guardarPartida.contains("s")) {
                                 System.out.print("¿Cual es tu nombre? ");
-                                String usuario = new Scanner(
-                                    System.in
-                                ).nextLine();
+                                String usuario = scanner.nextLine();
                                 grabar(
                                     tableroDelUsuario,
                                     usuario,
@@ -271,9 +272,7 @@ public class Menu {
                                 System.out.print(
                                     "\n(Presiona la tecla \"↵\" para salir al menu)"
                                 );
-                                String enter = new Scanner(
-                                    System.in
-                                ).nextLine();
+                                scanner.nextLine();
                                 for (int i = 0; i < 45; i++) {
                                     System.out.println();
                                 }
@@ -302,7 +301,7 @@ public class Menu {
                     System.out.print(
                         "(Presiona la tecla \"↵\" para salir al menu)"
                     );
-                    String enter = new Scanner(System.in).nextLine();
+                    scanner.nextLine();
                     for (int i = 0; i < 45; i++) {
                         System.out.println();
                     }
