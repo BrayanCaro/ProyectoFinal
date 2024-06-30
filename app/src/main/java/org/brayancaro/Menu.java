@@ -77,12 +77,12 @@ public class Menu {
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
      * @param opcion -- Indica la opcion a realizar
      */
-    public static void realizarAccion(int opciones)
+    public void realizarAccion(int opciones)
         throws TocasteUnaBombaExcepcion, ComandoErroneoExcepcion, Exception {
         switch (opciones) {
             case 1:
                 System.out.print("¿Con cuantas filas? ");
-                int filas = Integer.parseInt(new Scanner(System.in).next());
+                int filas = Integer.parseInt(scanner.next());
 
                 try {
                     if (filas < 8) {
@@ -105,7 +105,7 @@ public class Menu {
                 }
 
                 System.out.print("¿Con cuantas columnas? ");
-                int columnas = Integer.parseInt(new Scanner(System.in).next());
+                int columnas = Integer.parseInt(scanner.next());
                 try {
                     if (columnas < 8) {
                         throw new IllegalArgumentException(
@@ -123,7 +123,7 @@ public class Menu {
                 }
 
                 System.out.print("¿Con cuantas bombas? ");
-                int bombas = Integer.parseInt(new Scanner(System.in).next());
+                int bombas = Integer.parseInt(scanner.next());
 
                 TableroPersonalizado tableroDelUsuario;
 
@@ -157,7 +157,7 @@ public class Menu {
                 } catch (Exception e) {}
                 do {
                     System.out.print("Introduce la cordenada > ");
-                    String comando = new Scanner(System.in).nextLine();
+                    String comando = scanner.nextLine();
                     comando.trim();
                     if (comando.contains(" ")) {
                         try {
@@ -189,7 +189,7 @@ public class Menu {
                             System.out.print(
                                 "¿Quieres marcar o ver esa celda? (m/v) "
                             );
-                            comando = new Scanner(System.in).nextLine();
+                            comando = scanner.nextLine();
                             comando.trim().toLowerCase();
 
                             if (comando.contains("m")) {
@@ -253,16 +253,12 @@ public class Menu {
                             System.out.print(
                                 "¿Quieres guardar tu partida? (s/n) "
                             );
-                            String guardarPartida = new Scanner(
-                                System.in
-                            ).nextLine();
+                            String guardarPartida = scanner.nextLine();
                             guardarPartida.toLowerCase();
 
                             if (guardarPartida.contains("s")) {
                                 System.out.print("¿Cual es tu nombre? ");
-                                String usuario = new Scanner(
-                                    System.in
-                                ).nextLine();
+                                String usuario = scanner.nextLine();
                                 grabar(
                                     tableroDelUsuario,
                                     usuario,
@@ -276,9 +272,7 @@ public class Menu {
                                 System.out.print(
                                     "\n(Presiona la tecla \"↵\" para salir al menu)"
                                 );
-                                String enter = new Scanner(
-                                    System.in
-                                ).nextLine();
+                                scanner.nextLine();
                                 for (int i = 0; i < 45; i++) {
                                     System.out.println();
                                 }
@@ -307,7 +301,7 @@ public class Menu {
                     System.out.print(
                         "(Presiona la tecla \"↵\" para salir al menu)"
                     );
-                    String enter = new Scanner(System.in).nextLine();
+                    scanner.nextLine();
                     for (int i = 0; i < 45; i++) {
                         System.out.println();
                     }
