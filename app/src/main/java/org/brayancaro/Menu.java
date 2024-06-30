@@ -6,53 +6,58 @@
  */
 package org.brayancaro;
 
-import java.io.*;
-import java.lang.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Menu {
 
-    private static Scanner io;
     private static TableroPersonalizado tableroEstatico;
     private static String[][] datos = new String[20][4];
     private static boolean ayuda = true;
     static MiHilo hola = new MiHilo("hola");
     static Thread cronometro = new Thread(hola);
 
-    public static void main(String[] args) {
-        int opcion;
-        io = new Scanner(System.in);
-        try {
-            do {
-                menu();
-                opcion = Integer.parseInt(new Scanner(System.in).next());
-                if (ayuda) {
-                    realizarAccion(opcion);
-                }
-            } while (ayuda && opcion != 4);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e);
-            System.out.println("Escribe solo un numero del 1 al 3\n");
-            main(args);
-        } catch (TocasteUnaBombaExcepcion e) {
-            tableroEstatico.mostrarTodasLasBombas();
-            System.out.println("\033[33m" + tableroEstatico + "\033[0m");
-            System.out.println(
-                tableroEstatico.centrar() +
-                " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
-            );
-            try {
-                cronometro.interrupt();
-            } catch (IllegalThreadStateException ee) {}
-            main(args);
-        } catch (InputMismatchException e) {
-            System.out.println("Escribe solo un numero del 1 al 3\n");
-            main(args);
-        } catch (Exception e) {
-            System.out.println(e);
-            main(args);
+    protected Scanner scanner;
+
+    public Menu setScanner(Scanner scanner) {
+        this.scanner = scanner;
+
+        return this;
+    }
+
+    public static void main(String[] args) throws ComandoErroneoExcepcion, Exception {
+        try (var scanner = new Scanner(System.in)) {
+            new Menu().setScanner(scanner).play();
         }
+    }
+
+    public void play() throws ComandoErroneoExcepcion, Exception {
+        int opcion;
+        do {
+            menu();
+            opcion = Integer.parseInt(scanner.next());
+            if (ayuda) {
+                try {
+                    realizarAccion(opcion);
+                } catch (TocasteUnaBombaExcepcion e) {
+                    tableroEstatico.mostrarTodasLasBombas();
+                    System.out.println("\033[33m" + tableroEstatico + "\033[0m");
+                    System.out.println(
+                            tableroEstatico.centrar() +
+                            " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
+                            );
+                    try {
+                        cronometro.interrupt();
+                    } catch (IllegalThreadStateException ee) {}
+                }
+            }
+        } while (ayuda && opcion != 4);
     }
 
     /**
