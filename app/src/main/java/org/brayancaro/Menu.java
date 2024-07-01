@@ -75,7 +75,7 @@ public class Menu {
     public void realizarAccion(Option option)
         throws TocasteUnaBombaExcepcion, ComandoErroneoExcepcion, Exception {
         switch (option) {
-            case Option.START:
+            case Option.START -> {
                 System.out.print("¿Con cuantas filas? ");
                 int filas = Integer.parseInt(scanner.next());
 
@@ -101,6 +101,7 @@ public class Menu {
 
                 System.out.print("¿Con cuantas columnas? ");
                 int columnas = Integer.parseInt(scanner.next());
+
                 try {
                     if (columnas < 8) {
                         throw new IllegalArgumentException(
@@ -289,8 +290,9 @@ public class Menu {
                     tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
                     option != Option.QUIT
                 );
-                break;
-            case Option.SHOW_HISTORY:
+            }
+
+            case Option.SHOW_HISTORY -> {
                 try {
                     tabla(cargarDatosDeUnArchivo());
                     System.out.print(
@@ -312,18 +314,16 @@ public class Menu {
                         "No hay nada que mostrar, juega y guarda una partida\n"
                     );
                 }
-                break;
-            case Option.DELETE_HISTORY:
+            }
+            case Option.DELETE_HISTORY -> {
                 try {
                     borrarDatos();
                     System.out.println("Listo!, datos borrados\n");
                 } catch (NullPointerException e) {
                     System.out.println("No hay nada que borrar\n");
                 }
-                break;
-            case Option.QUIT:
-                System.out.println("Adios 👋");
-                break;
+            }
+            case Option.QUIT -> System.out.println("Adios 👋");
         }
     }
 
