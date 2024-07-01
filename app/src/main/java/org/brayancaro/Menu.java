@@ -15,11 +15,13 @@ import java.io.ObjectOutputStream;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import org.brayancaro.enums.menu.Option;
+import org.brayancaro.exceptions.menu.InvalidOptionException;
+
 public class Menu {
 
     private static TableroPersonalizado tableroEstatico;
     private static String[][] datos = new String[20][4];
-    private static boolean ayuda = true;
     static MiHilo hola = new MiHilo("hola");
     static Thread cronometro = new Thread(hola);
 
@@ -32,26 +34,33 @@ public class Menu {
     }
 
     public void play() throws ComandoErroneoExcepcion, Exception {
-        int opcion;
+        Option option = null;
+
         do {
-            menu();
-            opcion = Integer.parseInt(scanner.next());
-            if (ayuda) {
-                try {
-                    realizarAccion(opcion);
-                } catch (TocasteUnaBombaExcepcion e) {
-                    tableroEstatico.mostrarTodasLasBombas();
-                    System.out.println("\033[33m" + tableroEstatico + "\033[0m");
-                    System.out.println(
-                            tableroEstatico.centrar() +
-                            " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
-                            );
-                    try {
-                        cronometro.interrupt();
-                    } catch (IllegalThreadStateException ee) {}
-                }
+            Option.printOptionsText();
+
+            try {
+                option = askOption();
+            } catch (InvalidOptionException e) {
+                e.reportToUser();
+                continue;
             }
-        } while (ayuda && opcion != 4);
+
+            try {
+                realizarAccion(option);
+            } catch (TocasteUnaBombaExcepcion e) {
+                tableroEstatico.mostrarTodasLasBombas();
+                System.out.println("\033[33m" + tableroEstatico + "\033[0m");
+                System.out.println(
+                        tableroEstatico.centrar() +
+                        " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
+                        );
+                try {
+                    cronometro.interrupt();
+                } catch (IllegalThreadStateException ee) {}
+            }
+
+        } while (option != Option.QUIT);
     }
 
     public Menu setScanner(Scanner scanner) {
@@ -61,26 +70,12 @@ public class Menu {
     }
 
     /**
-     * Metodo estatico que solo imprime el menu
-     */
-    private static void menu() {
-        System.out.println(" ⧄------------------------------------⧅");
-        System.out.println(" |          ¿Que quieres hacer?       |");
-        System.out.println(" | 1. Jugar una partida personalizada |");
-        System.out.println(" | 2. Ver registros                   |");
-        System.out.println(" | 3. Borrar registros                |");
-        System.out.println(" | 4. Salir                           |");
-        System.out.println(" ⧅------------------------------------⧄");
-    }
-
-    /**
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
-     * @param opcion -- Indica la opcion a realizar
      */
-    public void realizarAccion(int opciones)
+    public void realizarAccion(Option option)
         throws TocasteUnaBombaExcepcion, ComandoErroneoExcepcion, Exception {
-        switch (opciones) {
-            case 1:
+        switch (option) {
+            case Option.START:
                 System.out.print("¿Con cuantas filas? ");
                 int filas = Integer.parseInt(scanner.next());
 
@@ -97,7 +92,7 @@ public class Menu {
                     }
                 } catch (IllegalArgumentException e) {
                     System.out.println(e);
-                    realizarAccion(1);
+                    realizarAccion(Option.START);
                 } catch (InputMismatchException e) {
                     System.out.println(
                         "Las columas solo se escriben con numeros\n"
@@ -119,7 +114,7 @@ public class Menu {
                     }
                 } catch (IllegalArgumentException e) {
                     System.out.println(e);
-                    realizarAccion(1);
+                    realizarAccion(Option.START);
                 }
 
                 System.out.print("¿Con cuantas bombas? ");
@@ -140,7 +135,7 @@ public class Menu {
                     }
                 } catch (IllegalArgumentException e) {
                     System.out.println(e);
-                    realizarAccion(1);
+                    realizarAccion(Option.START);
                 }
 
                 tableroDelUsuario = new TableroPersonalizado(
@@ -277,25 +272,25 @@ public class Menu {
                                     System.out.println();
                                 }
                                 aux = false;
-                                opciones = 4;
+                                option = Option.QUIT;
                             } else if (guardarPartida.contains("n")) {
                                 System.out.println();
                                 aux = false;
-                                opciones = 4;
+                                option = Option.QUIT;
                                 break;
                             } else {
                                 System.out.println("Elije una opcion");
                             }
                         } while (aux);
 
-                        opciones = 4;
+                        option = Option.QUIT;
                     }
                 } while (
                     tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
-                    opciones != 4
+                    option != Option.QUIT
                 );
                 break;
-            case 2:
+            case Option.SHOW_HISTORY:
                 try {
                     tabla(cargarDatosDeUnArchivo());
                     System.out.print(
@@ -318,7 +313,7 @@ public class Menu {
                     );
                 }
                 break;
-            case 3:
+            case Option.DELETE_HISTORY:
                 try {
                     borrarDatos();
                     System.out.println("Listo!, datos borrados\n");
@@ -326,13 +321,18 @@ public class Menu {
                     System.out.println("No hay nada que borrar\n");
                 }
                 break;
-            case 4:
+            case Option.QUIT:
                 System.out.println("Adios 👋");
-                ayuda = false;
                 break;
-            default:
-                System.out.println("Esa opcion no se puede elegir\n");
-                break;
+        }
+    }
+
+    protected Option askOption() throws InvalidOptionException {
+        try {
+            return Option.fromIndex(scanner.nextInt());
+        } catch (InputMismatchException e) {
+            scanner.next();
+            throw new InvalidOptionException();
         }
     }
 
