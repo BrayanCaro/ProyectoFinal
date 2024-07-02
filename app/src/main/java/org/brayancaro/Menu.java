@@ -17,6 +17,7 @@ import java.util.Scanner;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.exceptions.menu.InvalidOptionException;
+import org.brayancaro.prompts.PromptInt;
 
 public class Menu {
 
@@ -37,14 +38,7 @@ public class Menu {
         Option option = null;
 
         do {
-            Option.printOptionsText();
-
-            try {
-                option = askOption();
-            } catch (InvalidOptionException e) {
-                e.reportToUser();
-                continue;
-            }
+            option = askOption();
 
             try {
                 realizarAccion(option);
@@ -329,9 +323,16 @@ public class Menu {
 
     protected Option askOption() throws InvalidOptionException {
         try {
-            return Option.fromIndex(scanner.nextInt());
-        } catch (InputMismatchException e) {
-            scanner.next();
+            int ask = new PromptInt()
+                .scanner(scanner)
+                .title(Option.getPrintOptionsText())
+                .min(1)
+                .max(4)
+                .ask();
+
+            return Option.fromIndex(ask);
+        } catch (InvalidOptionException e) {
+            e.reportToUser();
             throw new InvalidOptionException();
         }
     }
