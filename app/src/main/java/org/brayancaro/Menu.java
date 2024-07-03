@@ -322,19 +322,12 @@ public class Menu {
     }
 
     protected Option askOption() throws InvalidOptionException {
-        try {
-            int ask = new PromptInt()
-                .scanner(scanner)
-                .title(Option.getPrintOptionsText())
-                .min(1)
-                .max(4)
-                .ask();
-
-            return Option.fromIndex(ask);
-        } catch (InvalidOptionException e) {
-            e.reportToUser();
-            throw new InvalidOptionException();
-        }
+        return Option.fromIndex(new PromptInt()
+            .scanner(scanner)
+            .title(Option.getPrintOptionsText())
+            .min(1)
+            .max(4)
+            .ask());
     }
 
     /**
