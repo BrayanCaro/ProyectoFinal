@@ -16,7 +16,7 @@ import org.brayancaro.rules.RuleInterface;
 public class PromptInt {
     protected Scanner scanner;
 
-    protected Optional<String> title;
+    protected Optional<String> title = Optional.empty();
 
     protected LinkedList<RuleInterface> rules = new LinkedList<>();
 
