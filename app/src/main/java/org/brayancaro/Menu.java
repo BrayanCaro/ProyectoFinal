@@ -70,74 +70,36 @@ public class Menu {
         throws TocasteUnaBombaExcepcion, ComandoErroneoExcepcion, Exception {
         switch (option) {
             case Option.START -> {
-                System.out.print("¿Con cuantas filas? ");
-                int filas = Integer.parseInt(scanner.next());
+                var filas = new PromptInt()
+                    .scanner(scanner)
+                    .title("¿Con cuantas filas? ")
+                    .printTitleUsing(System.out::print)
+                    .min(8)
+                    .max(29)
+                    .ask();
 
-                try {
-                    if (filas < 8) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 8 o mas filas"
-                        );
-                    }
-                    if (filas > 29) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 29 o menos filas"
-                        );
-                    }
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e);
-                    realizarAccion(Option.START);
-                } catch (InputMismatchException e) {
-                    System.out.println(
-                        "Las columas solo se escriben con numeros\n"
-                    );
-                }
+                var columnas = new PromptInt()
+                    .scanner(scanner)
+                    .title("¿Con cuantas columnas? ")
+                    .printTitleUsing(System.out::print)
+                    .min(8)
+                    .max(29)
+                    .ask();
 
-                System.out.print("¿Con cuantas columnas? ");
-                int columnas = Integer.parseInt(scanner.next());
+                var bombas = new PromptInt()
+                    .scanner(scanner)
+                    .title("¿Con cuantas bombas? ")
+                    .printTitleUsing(System.out::print)
+                    .min(1)
+                    .max((filas * columnas) - 1)
+                    .ask();
 
-                try {
-                    if (columnas < 8) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 8 o mas columnas"
-                        );
-                    }
-                    if (columnas > 29) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 29 0 menos columnas"
-                        );
-                    }
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e);
-                    realizarAccion(Option.START);
-                }
-
-                System.out.print("¿Con cuantas bombas? ");
-                int bombas = Integer.parseInt(scanner.next());
-
-                TableroPersonalizado tableroDelUsuario;
-
-                try {
-                    if (bombas <= 0) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner mas bombas"
-                        );
-                    }
-                    if (bombas >= (filas * columnas)) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner menos bombas"
-                        );
-                    }
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e);
-                    realizarAccion(Option.START);
-                }
-
-                tableroDelUsuario = new TableroPersonalizado(
+                var tableroDelUsuario = new TableroPersonalizado(
                     filas,
                     columnas,
                     bombas
                 );
+
                 tableroEstatico = tableroDelUsuario;
                 System.out.println(tableroDelUsuario);
                 System.out.println("EMPECEMOS");
