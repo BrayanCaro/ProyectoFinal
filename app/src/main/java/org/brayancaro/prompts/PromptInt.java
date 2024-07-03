@@ -4,6 +4,7 @@ import java.util.InputMismatchException;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 import org.brayancaro.rules.Max;
 import org.brayancaro.rules.Min;
@@ -19,23 +20,31 @@ public class PromptInt {
 
     protected LinkedList<RuleInterface> rules = new LinkedList<>();
 
+    private Consumer<? super String> printTitleUsing = System.out::println;
+
     public int ask() {
         do {
             try {
-                title.ifPresent(System.out::println);
-                int value = askOne();
+                printTitleWhenPresent();
+
+                var value = askOne();
 
                 Optional<RuleInterface> rule = getFailedRule(value);
+
                 if (rule.isPresent()) {
                     System.out.println(rule.get().getErrorMessage());
                     continue;
                 }
 
                 return value;
-            } catch (Exception e) {
+            } catch (InputMismatchException e) {
                 continue;
             }
         } while (true);
+    }
+
+    private void printTitleWhenPresent() {
+        title.ifPresent(printTitleUsing);
     }
 
     private Optional<RuleInterface> getFailedRule(int value) {
@@ -68,6 +77,12 @@ public class PromptInt {
 
     public PromptInt title(String title) {
         return title(Optional.of(title));
+    }
+
+    public PromptInt printTitleUsing(Consumer<? super String> strategy) {
+        this.printTitleUsing = strategy;
+
+        return this;
     }
 
     public PromptInt addRules(RuleInterface... rules) {
