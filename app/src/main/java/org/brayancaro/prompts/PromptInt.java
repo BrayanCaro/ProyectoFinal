@@ -49,6 +49,7 @@ public class PromptInt {
             return scanner.nextInt();
         } catch (InputMismatchException e) {
             scanner.next();
+            System.out.println("The value must be an integer");
             throw e;
         }
     }
