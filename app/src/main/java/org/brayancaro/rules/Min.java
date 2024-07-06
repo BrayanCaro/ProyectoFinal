@@ -1,17 +1,17 @@
 package org.brayancaro.rules;
 
-public class Min implements RuleInterface {
+public class Min implements RuleInterface<Integer> {
     protected int value;
 
     protected int minValue;
 
-    public RuleInterface withValue(int value) {
+    public RuleInterface<Integer> withValue(Integer value) {
         this.value = value;
 
         return this;
     }
 
-    public RuleInterface withMinValue(int minValue) {
+    public RuleInterface<Integer> withMinValue(Integer minValue) {
         this.minValue = minValue;
 
         return this;

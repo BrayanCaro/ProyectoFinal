@@ -1,17 +1,17 @@
 package org.brayancaro.rules;
 
-public class Max implements RuleInterface {
+public class Max implements RuleInterface<Integer> {
     protected int value;
 
     protected int maxValue;
 
-    public RuleInterface withValue(int value) {
+    public RuleInterface<Integer> withValue(Integer value) {
         this.value = value;
 
         return this;
     }
 
-    public RuleInterface withMaxValue(int maxValue) {
+    public RuleInterface<Integer> withMaxValue(Integer maxValue) {
         this.maxValue = maxValue;
 
         return this;

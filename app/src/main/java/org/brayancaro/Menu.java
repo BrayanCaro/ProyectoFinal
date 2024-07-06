@@ -71,27 +71,27 @@ public class Menu {
         switch (option) {
             case Option.START -> {
                 var filas = new PromptInt()
+                    .min(8)
+                    .max(29)
                     .scanner(scanner)
                     .title("¿Con cuantas filas? ")
                     .printTitleUsing(System.out::print)
-                    .min(8)
-                    .max(29)
                     .ask();
 
                 var columnas = new PromptInt()
+                    .min(8)
+                    .max(29)
                     .scanner(scanner)
                     .title("¿Con cuantas columnas? ")
                     .printTitleUsing(System.out::print)
-                    .min(8)
-                    .max(29)
                     .ask();
 
                 var bombas = new PromptInt()
+                    .min(1)
+                    .max((filas * columnas) - 1)
                     .scanner(scanner)
                     .title("¿Con cuantas bombas? ")
                     .printTitleUsing(System.out::print)
-                    .min(1)
-                    .max((filas * columnas) - 1)
                     .ask();
 
                 var tableroDelUsuario = new TableroPersonalizado(
@@ -285,10 +285,10 @@ public class Menu {
 
     protected Option askOption() throws InvalidOptionException {
         return Option.fromIndex(new PromptInt()
-            .scanner(scanner)
-            .title(Option.getPrintOptionsText())
             .min(1)
             .max(4)
+            .scanner(scanner)
+            .title(Option.getPrintOptionsText())
             .ask());
     }
 
