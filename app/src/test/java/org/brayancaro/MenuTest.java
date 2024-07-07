@@ -5,6 +5,7 @@ package org.brayancaro;
 
 import static org.junit.Assert.*;
 
+import java.util.Random;
 import java.util.Scanner;
 
 import org.junit.Test;
@@ -23,8 +24,28 @@ public class MenuTest {
     }
 
     @Test
+    public void playerCanWinAGame() throws Exception {
+        new Menu()
+            .random(new Random(120))
+            .setScanner(new Scanner("""
+                        1 # start game
+                        8 # rows
+                        8 # columns
+                        1 # bombs
+                        1 1
+                        v
+                        n
+                        4 # exit
+                        """))
+            .play();
+
+        assertTrue(true);
+    }
+
+    @Test
     public void playerCanQuitGameAfterStarting() throws Exception {
         new Menu()
+            .random(new Random(120))
             .setScanner(new Scanner("""
                         1 # start game
                         8 # rows

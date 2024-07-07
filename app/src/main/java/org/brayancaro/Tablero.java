@@ -7,11 +7,14 @@
 package org.brayancaro;
 
 import java.io.Serializable;
+import java.util.Random;
 
 public abstract class Tablero implements Serializable {
 
     private static final long serialVersionUID = 42l;
     protected Celdas[][] celdas;
+
+    protected Random random;
 
     /**
      * Metodo para calcular un numero aleatorio entre un intervalo maximo (dado por el parametro) y el 0
@@ -19,7 +22,7 @@ public abstract class Tablero implements Serializable {
      * @return int -- El numero aleatorio
      */
     public int numeroEnteroAleatorio(int valorMaximo) {
-        return (int) (Math.random() * (valorMaximo + 1));
+        return random.nextInt(0, valorMaximo + 1);
     }
 
     /**
@@ -56,5 +59,11 @@ public abstract class Tablero implements Serializable {
         }
 
         return renglones + "\b\b ";
+    }
+
+    public Tablero random(Random random) {
+        this.random = random;
+
+        return this;
     }
 }

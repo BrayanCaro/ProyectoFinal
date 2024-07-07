@@ -8,6 +8,7 @@
 package org.brayancaro;
 
 import java.io.*;
+import java.util.Random;
 
 import org.brayancaro.enums.cell.State;
 import org.brayancaro.records.Coordinate;
@@ -25,8 +26,12 @@ public class TableroPersonalizado extends Tablero {
     public TableroPersonalizado(
         int filas,
         int columnas,
-        int numeroDeBombasParaPoner
+        int numeroDeBombasParaPoner,
+        Random random
     ) throws IllegalArgumentException {
+
+        random(random);
+
         if (numeroDeBombasParaPoner <= 0) {
             throw new IllegalArgumentException("Necesitas poner mas bombas");
         }
