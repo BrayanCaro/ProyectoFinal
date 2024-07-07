@@ -8,6 +8,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    alias(libs.plugins.sonarqube)
 }
 
 repositories {
@@ -33,4 +34,12 @@ application {
 
 tasks.getByName("run", JavaExec::class) {
  standardInput = System.`in`
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "BrayanCaro_ProyectoFinal")
+    property("sonar.organization", "brayancaro")
+    property("sonar.host.url", "https://sonarcloud.io")
+  }
 }
