@@ -112,32 +112,7 @@ public class Menu {
                     cronometro.start();
                 } catch (Exception e) {}
                 do {
-                    var coordinate = askCoordinate();
-                    var stateAction = askShouldReveal();
-
-                    try {
-                        tableroDelUsuario.execute(coordinate, stateAction);
-
-                        System.out.println(
-                                "Quedan " +
-                                tableroDelUsuario.jugadorGanoSinMarcas() +
-                                " casillas sin ver."
-                                );
-                        System.out.println(
-                                "Hay " + bombas + " bombas en el mapa"
-                                );
-                        System.out.println(tableroDelUsuario);
-                    } catch (NumberFormatException e) {
-                        System.out.println(
-                                "El comando solo puede tener 2 numeros separados por un espacio"
-                                );
-                    } catch (InputMismatchException e) {
-                        System.out.println(e);
-                    } catch (IndexOutOfBoundsException e) {
-                        System.out.println(e);
-                    } catch (IllegalAccessException e) {
-                        System.out.println(e);
-                    }
+                    executeChangeCellState(bombas, tableroDelUsuario);
 
                     if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
                         tableroDelUsuario.ganador();
@@ -220,6 +195,32 @@ public class Menu {
                 }
             }
             case Option.QUIT -> System.out.println("Adios 👋");
+        }
+    }
+
+    private void executeChangeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario) throws Exception {
+        var coordinate = askCoordinate();
+        var stateAction = askShouldReveal();
+        changeCellState(bombas, tableroDelUsuario, coordinate, stateAction);
+    }
+
+    private void changeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario, Coordinate coordinate,
+            State stateAction) throws Exception {
+        try {
+            tableroDelUsuario.execute(coordinate, stateAction);
+            System.out.printf("""
+                    Quedan %d casillas sin ver.
+                    Hay %s bombas en el mapa
+                    """, tableroDelUsuario.jugadorGanoSinMarcas(), bombas);
+            System.out.println(tableroDelUsuario);
+        } catch (NumberFormatException e) {
+            System.out.println("El comando solo puede tener 2 numeros separados por un espacio");
+        } catch (InputMismatchException e) {
+            System.out.println(e);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println(e);
+        } catch (IllegalAccessException e) {
+            System.out.println(e);
         }
     }
 
