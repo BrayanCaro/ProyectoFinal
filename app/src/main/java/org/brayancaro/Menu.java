@@ -14,10 +14,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.exceptions.menu.InvalidOptionException;
+import org.brayancaro.prompts.Prompt;
 import org.brayancaro.prompts.PromptInt;
+import org.brayancaro.records.Coordinate;
 
 public class Menu {
 
@@ -108,86 +111,48 @@ public class Menu {
                     cronometro.start();
                 } catch (Exception e) {}
                 do {
-                    System.out.print("Introduce la cordenada > ");
-                    String comando = scanner.nextLine();
-                    comando.trim();
-                    if (comando.contains(" ")) {
-                        try {
-                            String[] resultados = comando.split(" ");
-                            if (!comando.contains(" ")) {
-                                throw new ComandoErroneoExcepcion(
-                                    "Comando erroneo, pon solo 2 numeros separados por un espacio"
-                                );
-                            }
-                            if (resultados.length != 2) {
-                                throw new ComandoErroneoExcepcion(
-                                    "Comando erroneo, pon solo 2 numeros separados por un espacio"
-                                );
-                            }
+                    var coordinate = askCoordinate();
 
-                            int cordenadaX = Integer.parseInt(resultados[0]);
-                            if (cordenadaX < 0) {
-                                throw new IndexOutOfBoundsException(
-                                    "Introduce numeros positivos"
-                                );
-                            }
-                            int cordenadaY = Integer.parseInt(resultados[1]);
-                            if (cordenadaY < 0) {
-                                throw new IndexOutOfBoundsException(
-                                    "Introduce numeros positivos"
-                                );
-                            }
+                    var cordenadaX = coordinate.x();
+                    var cordenadaY = coordinate.y();
 
-                            System.out.print(
-                                "¿Quieres marcar o ver esa celda? (m/v) "
-                            );
-                            comando = scanner.nextLine();
-                            comando.trim().toLowerCase();
+                    String comando = askShouldReveal();
 
-                            if (comando.contains("m")) {
-                                System.out.println(comando.contains("m"));
-                                tableroDelUsuario.marcarCelda(
+                    try {
+                        if (comando.contains("m")) {
+                            System.out.println(comando.contains("m"));
+                            tableroDelUsuario.marcarCelda(
                                     cordenadaY - 1,
                                     cordenadaX - 1
-                                );
-                            } else if (comando.contains("v")) {
-                                tableroDelUsuario.elegirCelda(
+                                    );
+                        } else if (comando.contains("v")) {
+                            tableroDelUsuario.elegirCelda(
                                     cordenadaY - 1,
                                     cordenadaX - 1
-                                );
-                            } else {
-                                throw new InputMismatchException(
-                                    "Por favor Introduce \"m\" o \"v\""
-                                );
-                            }
-                            System.out.println(
+                                    );
+                        }
+
+                        System.out.println(
                                 "Quedan " +
                                 tableroDelUsuario.jugadorGanoSinMarcas() +
                                 " casillas sin ver."
-                            );
-                            System.out.println(
+                                );
+                        System.out.println(
                                 "Hay " + bombas + " bombas en el mapa"
-                            );
-                            System.out.println(tableroDelUsuario);
-                        } catch (NumberFormatException e) {
-                            System.out.println(
+                                );
+                        System.out.println(tableroDelUsuario);
+                    } catch (NumberFormatException e) {
+                        System.out.println(
                                 "El comando solo puede tener 2 numeros separados por un espacio"
-                            );
-                        } catch (InputMismatchException e) {
-                            System.out.println(e);
-                        } catch (IndexOutOfBoundsException e) {
-                            System.out.println(e);
-                        } catch (IllegalAccessException e) {
-                            System.out.println(e);
-                        } catch (ComandoErroneoExcepcion e) {
-                            System.out.println(e);
-                        }
-                    } else {
-                        try {
-                            throw new InputMismatchException("Comando erroneo");
-                        } catch (InputMismatchException e) {
-                            System.out.println(e);
-                        }
+                                );
+                    } catch (InputMismatchException e) {
+                        System.out.println(e);
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println(e);
+                    } catch (IllegalAccessException e) {
+                        System.out.println(e);
+                    } catch (ComandoErroneoExcepcion e) {
+                        System.out.println(e);
                     }
 
                     if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
@@ -281,6 +246,33 @@ public class Menu {
             }
             case Option.QUIT -> System.out.println("Adios 👋");
         }
+    }
+
+    private String askShouldReveal() {
+        Pattern pattern = Pattern.compile("\\s*[mv]\\s*", Pattern.CASE_INSENSITIVE);
+
+        return new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title( "¿Quieres marcar o ver esa celda? (m/v) ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .trim()
+            .toLowerCase();
+    }
+
+    private Coordinate askCoordinate() {
+        Pattern pattern = Pattern.compile("\\s*\\d+[^\\d]+\\d+\\s*");
+
+        var values = new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title("Introduce la cordenada > ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .split(" ");
+
+        return new Coordinate(Integer.parseInt(values[0]) , Integer.parseInt(values[1]));
     }
 
     protected Option askOption() throws InvalidOptionException {
