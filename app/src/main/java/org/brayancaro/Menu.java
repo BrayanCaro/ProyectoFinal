@@ -14,10 +14,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.exceptions.menu.InvalidOptionException;
+import org.brayancaro.prompts.Prompt;
 import org.brayancaro.prompts.PromptInt;
+import org.brayancaro.records.Coordinate;
 
 public class Menu {
 
@@ -71,27 +74,27 @@ public class Menu {
         switch (option) {
             case Option.START -> {
                 var filas = new PromptInt()
+                    .min(8)
+                    .max(29)
                     .scanner(scanner)
                     .title("¿Con cuantas filas? ")
                     .printTitleUsing(System.out::print)
-                    .min(8)
-                    .max(29)
                     .ask();
 
                 var columnas = new PromptInt()
+                    .min(8)
+                    .max(29)
                     .scanner(scanner)
                     .title("¿Con cuantas columnas? ")
                     .printTitleUsing(System.out::print)
-                    .min(8)
-                    .max(29)
                     .ask();
 
                 var bombas = new PromptInt()
+                    .min(1)
+                    .max((filas * columnas) - 1)
                     .scanner(scanner)
                     .title("¿Con cuantas bombas? ")
                     .printTitleUsing(System.out::print)
-                    .min(1)
-                    .max((filas * columnas) - 1)
                     .ask();
 
                 var tableroDelUsuario = new TableroPersonalizado(
@@ -108,86 +111,46 @@ public class Menu {
                     cronometro.start();
                 } catch (Exception e) {}
                 do {
-                    System.out.print("Introduce la cordenada > ");
-                    String comando = scanner.nextLine();
-                    comando.trim();
-                    if (comando.contains(" ")) {
-                        try {
-                            String[] resultados = comando.split(" ");
-                            if (!comando.contains(" ")) {
-                                throw new ComandoErroneoExcepcion(
-                                    "Comando erroneo, pon solo 2 numeros separados por un espacio"
-                                );
-                            }
-                            if (resultados.length != 2) {
-                                throw new ComandoErroneoExcepcion(
-                                    "Comando erroneo, pon solo 2 numeros separados por un espacio"
-                                );
-                            }
+                    var coordinate = askCoordinate();
 
-                            int cordenadaX = Integer.parseInt(resultados[0]);
-                            if (cordenadaX < 0) {
-                                throw new IndexOutOfBoundsException(
-                                    "Introduce numeros positivos"
-                                );
-                            }
-                            int cordenadaY = Integer.parseInt(resultados[1]);
-                            if (cordenadaY < 0) {
-                                throw new IndexOutOfBoundsException(
-                                    "Introduce numeros positivos"
-                                );
-                            }
+                    var cordenadaX = coordinate.x();
+                    var cordenadaY = coordinate.y();
 
-                            System.out.print(
-                                "¿Quieres marcar o ver esa celda? (m/v) "
-                            );
-                            comando = scanner.nextLine();
-                            comando.trim().toLowerCase();
+                    String comando = askShouldReveal();
 
-                            if (comando.contains("m")) {
-                                System.out.println(comando.contains("m"));
-                                tableroDelUsuario.marcarCelda(
+                    try {
+                        if (comando.contains("m")) {
+                            System.out.println(comando.contains("m"));
+                            tableroDelUsuario.marcarCelda(
                                     cordenadaY - 1,
                                     cordenadaX - 1
-                                );
-                            } else if (comando.contains("v")) {
-                                tableroDelUsuario.elegirCelda(
+                                    );
+                        } else if (comando.contains("v")) {
+                            tableroDelUsuario.elegirCelda(
                                     cordenadaY - 1,
                                     cordenadaX - 1
-                                );
-                            } else {
-                                throw new InputMismatchException(
-                                    "Por favor Introduce \"m\" o \"v\""
-                                );
-                            }
-                            System.out.println(
+                                    );
+                        }
+
+                        System.out.println(
                                 "Quedan " +
                                 tableroDelUsuario.jugadorGanoSinMarcas() +
                                 " casillas sin ver."
-                            );
-                            System.out.println(
+                                );
+                        System.out.println(
                                 "Hay " + bombas + " bombas en el mapa"
-                            );
-                            System.out.println(tableroDelUsuario);
-                        } catch (NumberFormatException e) {
-                            System.out.println(
+                                );
+                        System.out.println(tableroDelUsuario);
+                    } catch (NumberFormatException e) {
+                        System.out.println(
                                 "El comando solo puede tener 2 numeros separados por un espacio"
-                            );
-                        } catch (InputMismatchException e) {
-                            System.out.println(e);
-                        } catch (IndexOutOfBoundsException e) {
-                            System.out.println(e);
-                        } catch (IllegalAccessException e) {
-                            System.out.println(e);
-                        } catch (ComandoErroneoExcepcion e) {
-                            System.out.println(e);
-                        }
-                    } else {
-                        try {
-                            throw new InputMismatchException("Comando erroneo");
-                        } catch (InputMismatchException e) {
-                            System.out.println(e);
-                        }
+                                );
+                    } catch (InputMismatchException e) {
+                        System.out.println(e);
+                    } catch (IndexOutOfBoundsException e) {
+                        System.out.println(e);
+                    } catch (IllegalAccessException e) {
+                        System.out.println(e);
                     }
 
                     if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
@@ -200,48 +163,41 @@ public class Menu {
                         try {
                             cronometro.interrupt();
                         } catch (Exception e) {}
-                        boolean aux = true;
-                        do {
-                            System.out.print(
-                                "¿Quieres guardar tu partida? (s/n) "
-                            );
-                            String guardarPartida = scanner.nextLine();
-                            guardarPartida.toLowerCase();
 
-                            if (guardarPartida.contains("s")) {
-                                System.out.print("¿Cual es tu nombre? ");
-                                String usuario = scanner.nextLine();
-                                grabar(
+                        if (askShouldSaveGame()) {
+                            var username = new Prompt()
+                                .scanner(scanner)
+                                .title("¿Cual es tu nombre? ")
+                                .printTitleUsing(System.out::print)
+                                .ask()
+                                .toLowerCase()
+                                .trim();
+
+                            grabar(
                                     tableroDelUsuario,
-                                    usuario,
+                                    username,
                                     bombas,
                                     hola.tiempo
-                                );
-                                guardarDatos();
-                                System.out.print(
-                                    "¡Listo!, tu partida se ha guardado\n"
-                                );
-                                System.out.print(
-                                    "\n(Presiona la tecla \"↵\" para salir al menu)"
-                                );
-                                scanner.nextLine();
-                                for (int i = 0; i < 45; i++) {
-                                    System.out.println();
-                                }
-                                aux = false;
-                                option = Option.QUIT;
-                            } else if (guardarPartida.contains("n")) {
+                                  );
+
+                            guardarDatos();
+
+                            System.out.println( "¡Listo!, tu partida se ha guardado");
+                            System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
+
+                            scanner.nextLine();
+                            for (int i = 0; i < 45; i++) {
                                 System.out.println();
-                                aux = false;
-                                option = Option.QUIT;
-                                break;
-                            } else {
-                                System.out.println("Elije una opcion");
                             }
-                        } while (aux);
+
+                        } else {
+                            System.out.println();
+                            break;
+                        }
 
                         option = Option.QUIT;
                     }
+
                 } while (
                     tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
                     option != Option.QUIT
@@ -251,9 +207,7 @@ public class Menu {
             case Option.SHOW_HISTORY -> {
                 try {
                     tabla(cargarDatosDeUnArchivo());
-                    System.out.print(
-                        "(Presiona la tecla \"↵\" para salir al menu)"
-                    );
+                    System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
                     scanner.nextLine();
                     for (int i = 0; i < 45; i++) {
                         System.out.println();
@@ -283,12 +237,52 @@ public class Menu {
         }
     }
 
+    private boolean askShouldSaveGame() {
+        Pattern pattern = Pattern.compile("\\s*[sn]\\s*", Pattern.CASE_INSENSITIVE);
+
+        return new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title("¿Quieres guardar tu partida? (s/n) ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .toLowerCase()
+            .contains("s");
+    }
+
+    private String askShouldReveal() {
+        Pattern pattern = Pattern.compile("\\s*[mv]\\s*", Pattern.CASE_INSENSITIVE);
+
+        return new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title( "¿Quieres marcar o ver esa celda? (m/v) ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .trim()
+            .toLowerCase();
+    }
+
+    private Coordinate askCoordinate() {
+        Pattern pattern = Pattern.compile("\\s*\\d+[^\\d]+\\d+\\s*");
+
+        var values = new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title("Introduce la cordenada > ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .split(" ");
+
+        return new Coordinate(Integer.parseInt(values[0]) , Integer.parseInt(values[1]));
+    }
+
     protected Option askOption() throws InvalidOptionException {
         return Option.fromIndex(new PromptInt()
-            .scanner(scanner)
-            .title(Option.getPrintOptionsText())
             .min(1)
             .max(4)
+            .scanner(scanner)
+            .title(Option.getPrintOptionsText())
             .ask());
     }
 

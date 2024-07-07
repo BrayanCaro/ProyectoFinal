@@ -3,8 +3,8 @@ package org.brayancaro.rules;
 /**
  * RuleInterface
  */
-public interface RuleInterface {
-    public RuleInterface withValue(int value);
+public interface RuleInterface<T> {
+    public RuleInterface<T> withValue(T value);
 
     public boolean passes();
 
