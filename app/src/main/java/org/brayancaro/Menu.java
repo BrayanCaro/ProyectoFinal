@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
+import org.brayancaro.enums.cell.State;
 import org.brayancaro.exceptions.menu.InvalidOptionException;
 import org.brayancaro.prompts.Prompt;
 import org.brayancaro.prompts.PromptInt;
@@ -111,47 +112,7 @@ public class Menu {
                     cronometro.start();
                 } catch (Exception e) {}
                 do {
-                    var coordinate = askCoordinate();
-
-                    var cordenadaX = coordinate.x();
-                    var cordenadaY = coordinate.y();
-
-                    String comando = askShouldReveal();
-
-                    try {
-                        if (comando.contains("m")) {
-                            System.out.println(comando.contains("m"));
-                            tableroDelUsuario.marcarCelda(
-                                    cordenadaY - 1,
-                                    cordenadaX - 1
-                                    );
-                        } else if (comando.contains("v")) {
-                            tableroDelUsuario.elegirCelda(
-                                    cordenadaY - 1,
-                                    cordenadaX - 1
-                                    );
-                        }
-
-                        System.out.println(
-                                "Quedan " +
-                                tableroDelUsuario.jugadorGanoSinMarcas() +
-                                " casillas sin ver."
-                                );
-                        System.out.println(
-                                "Hay " + bombas + " bombas en el mapa"
-                                );
-                        System.out.println(tableroDelUsuario);
-                    } catch (NumberFormatException e) {
-                        System.out.println(
-                                "El comando solo puede tener 2 numeros separados por un espacio"
-                                );
-                    } catch (InputMismatchException e) {
-                        System.out.println(e);
-                    } catch (IndexOutOfBoundsException e) {
-                        System.out.println(e);
-                    } catch (IllegalAccessException e) {
-                        System.out.println(e);
-                    }
+                    executeChangeCellState(bombas, tableroDelUsuario);
 
                     if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
                         tableroDelUsuario.ganador();
@@ -164,37 +125,7 @@ public class Menu {
                             cronometro.interrupt();
                         } catch (Exception e) {}
 
-                        if (askShouldSaveGame()) {
-                            var username = new Prompt()
-                                .scanner(scanner)
-                                .title("¿Cual es tu nombre? ")
-                                .printTitleUsing(System.out::print)
-                                .ask()
-                                .toLowerCase()
-                                .trim();
-
-                            grabar(
-                                    tableroDelUsuario,
-                                    username,
-                                    bombas,
-                                    hola.tiempo
-                                  );
-
-                            guardarDatos();
-
-                            System.out.println( "¡Listo!, tu partida se ha guardado");
-                            System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
-
-                            scanner.nextLine();
-                            for (int i = 0; i < 45; i++) {
-                                System.out.println();
-                            }
-
-                        } else {
-                            System.out.println();
-                            break;
-                        }
-
+                        executeSaveGame(bombas, tableroDelUsuario);
                         option = Option.QUIT;
                     }
 
@@ -237,6 +168,67 @@ public class Menu {
         }
     }
 
+    private void executeSaveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        if (askShouldSaveGame()) {
+            saveGame(bombas, tableroDelUsuario);
+        } else {
+            System.out.println();
+        }
+    }
+
+    private void saveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        var username = new Prompt()
+            .scanner(scanner)
+            .title("¿Cual es tu nombre? ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .toLowerCase()
+            .trim();
+
+        grabar(
+                tableroDelUsuario,
+                username,
+                bombas,
+                hola.tiempo
+              );
+
+        guardarDatos();
+
+        System.out.println( "¡Listo!, tu partida se ha guardado");
+        System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
+
+        scanner.nextLine();
+        for (int i = 0; i < 45; i++) {
+            System.out.println();
+        }
+    }
+
+    private void executeChangeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario) throws Exception {
+        var coordinate = askCoordinate();
+        var stateAction = askShouldReveal();
+        changeCellState(bombas, tableroDelUsuario, coordinate, stateAction);
+    }
+
+    private void changeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario, Coordinate coordinate,
+            State stateAction) throws Exception {
+        try {
+            tableroDelUsuario.execute(coordinate, stateAction);
+            System.out.printf("""
+                    Quedan %d casillas sin ver.
+                    Hay %s bombas en el mapa
+                    """, tableroDelUsuario.jugadorGanoSinMarcas(), bombas);
+            System.out.println(tableroDelUsuario);
+        } catch (NumberFormatException e) {
+            System.out.println("El comando solo puede tener 2 numeros separados por un espacio");
+        } catch (InputMismatchException e) {
+            System.out.println(e);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println(e);
+        } catch (IllegalAccessException e) {
+            System.out.println(e);
+        }
+    }
+
     private boolean askShouldSaveGame() {
         Pattern pattern = Pattern.compile("\\s*[sn]\\s*", Pattern.CASE_INSENSITIVE);
 
@@ -250,31 +242,33 @@ public class Menu {
             .contains("s");
     }
 
-    private String askShouldReveal() {
+    private State askShouldReveal() {
         Pattern pattern = Pattern.compile("\\s*[mv]\\s*", Pattern.CASE_INSENSITIVE);
 
-        return new Prompt()
+        var isRevealed = new Prompt()
             .pattern(pattern)
             .scanner(scanner)
             .title( "¿Quieres marcar o ver esa celda? (m/v) ")
             .printTitleUsing(System.out::print)
             .ask()
             .trim()
-            .toLowerCase();
+            .toLowerCase()
+            .contains("v");
+
+        return isRevealed ? State.REVEALED : State.MARKED;
     }
 
     private Coordinate askCoordinate() {
-        Pattern pattern = Pattern.compile("\\s*\\d+[^\\d]+\\d+\\s*");
+        Pattern pattern = Pattern.compile(Coordinate.PATTERN);
 
-        var values = new Prompt()
+        var value = new Prompt()
             .pattern(pattern)
             .scanner(scanner)
             .title("Introduce la cordenada > ")
             .printTitleUsing(System.out::print)
-            .ask()
-            .split(" ");
+            .ask();
 
-        return new Coordinate(Integer.parseInt(values[0]) , Integer.parseInt(values[1]));
+        return Coordinate.parse(value);
     }
 
     protected Option askOption() throws InvalidOptionException {
