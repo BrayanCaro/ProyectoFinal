@@ -31,13 +31,13 @@ public class Menu {
 
     protected Scanner scanner;
 
-    public static void main(String[] args) throws ComandoErroneoExcepcion, Exception {
+    public static void main(String[] args) throws Exception {
         try (var scanner = new Scanner(System.in)) {
             new Menu().setScanner(scanner).play();
         }
     }
 
-    public void play() throws ComandoErroneoExcepcion, Exception {
+    public void play() throws Exception {
         Option option = null;
 
         do {
@@ -70,7 +70,7 @@ public class Menu {
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
      */
     public void realizarAccion(Option option)
-        throws TocasteUnaBombaExcepcion, ComandoErroneoExcepcion, Exception {
+        throws TocasteUnaBombaExcepcion, Exception {
         switch (option) {
             case Option.START -> {
                 var filas = new PromptInt()
