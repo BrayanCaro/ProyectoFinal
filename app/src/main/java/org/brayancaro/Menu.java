@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
+import org.brayancaro.enums.cell.State;
 import org.brayancaro.exceptions.menu.InvalidOptionException;
 import org.brayancaro.prompts.Prompt;
 import org.brayancaro.prompts.PromptInt;
@@ -112,15 +113,10 @@ public class Menu {
                 } catch (Exception e) {}
                 do {
                     var coordinate = askCoordinate();
-
-                    String comando = askShouldReveal();
+                    var stateAction = askShouldReveal();
 
                     try {
-                        if (comando.contains("m")) {
-                            tableroDelUsuario.marcarCelda(coordinate);
-                        } else if (comando.contains("v")) {
-                            tableroDelUsuario.elegirCelda(coordinate);
-                        }
+                        tableroDelUsuario.execute(coordinate, stateAction);
 
                         System.out.println(
                                 "Quedan " +
@@ -240,17 +236,20 @@ public class Menu {
             .contains("s");
     }
 
-    private String askShouldReveal() {
+    private State askShouldReveal() {
         Pattern pattern = Pattern.compile("\\s*[mv]\\s*", Pattern.CASE_INSENSITIVE);
 
-        return new Prompt()
+        var isRevealed = new Prompt()
             .pattern(pattern)
             .scanner(scanner)
             .title( "¿Quieres marcar o ver esa celda? (m/v) ")
             .printTitleUsing(System.out::print)
             .ask()
             .trim()
-            .toLowerCase();
+            .toLowerCase()
+            .contains("v");
+
+        return isRevealed ? State.REVEALED : State.MARKED;
     }
 
     private Coordinate askCoordinate() {

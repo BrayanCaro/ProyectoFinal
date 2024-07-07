@@ -9,6 +9,7 @@ package org.brayancaro;
 
 import java.io.*;
 
+import org.brayancaro.enums.cell.State;
 import org.brayancaro.records.Coordinate;
 
 public class TableroPersonalizado extends Tablero {
@@ -519,5 +520,15 @@ public class TableroPersonalizado extends Tablero {
             salida += " ";
         }
         return (salida);
+    }
+
+    /**
+     * TODO improve error handling
+     */
+    public void execute(Coordinate coordinate, State state) throws Exception {
+        switch (state) {
+            case MARKED  -> marcarCelda(coordinate);
+            case REVEALED -> elegirCelda(coordinate);
+        }
     }
 }
