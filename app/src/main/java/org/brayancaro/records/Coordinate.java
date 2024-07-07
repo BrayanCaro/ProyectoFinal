@@ -6,8 +6,10 @@ import java.util.regex.Pattern;
 public record Coordinate(int x, int y) {
     public static final String PATTERN = "\\s*(?<x>\\d+)[^\\d]+(?<y>\\d+)\\s*";
 
-    public static Coordinate parse(String coordinate) {
+    public static Coordinate parse(String coordinate) throws IllegalStateException {
         Matcher matcher = Pattern.compile(PATTERN).matcher(coordinate);
+
+        matcher.matches();
 
         return new Coordinate(
                 parseAxis(matcher.group("x")),
