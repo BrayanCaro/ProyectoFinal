@@ -113,23 +113,13 @@ public class Menu {
                 do {
                     var coordinate = askCoordinate();
 
-                    var cordenadaX = coordinate.x();
-                    var cordenadaY = coordinate.y();
-
                     String comando = askShouldReveal();
 
                     try {
                         if (comando.contains("m")) {
-                            System.out.println(comando.contains("m"));
-                            tableroDelUsuario.marcarCelda(
-                                    cordenadaY - 1,
-                                    cordenadaX - 1
-                                    );
+                            tableroDelUsuario.marcarCelda(coordinate);
                         } else if (comando.contains("v")) {
-                            tableroDelUsuario.elegirCelda(
-                                    cordenadaY - 1,
-                                    cordenadaX - 1
-                                    );
+                            tableroDelUsuario.elegirCelda(coordinate);
                         }
 
                         System.out.println(
@@ -264,17 +254,16 @@ public class Menu {
     }
 
     private Coordinate askCoordinate() {
-        Pattern pattern = Pattern.compile("\\s*\\d+[^\\d]+\\d+\\s*");
+        Pattern pattern = Pattern.compile(Coordinate.PATTERN);
 
-        var values = new Prompt()
+        var value = new Prompt()
             .pattern(pattern)
             .scanner(scanner)
             .title("Introduce la cordenada > ")
             .printTitleUsing(System.out::print)
-            .ask()
-            .split(" ");
+            .ask();
 
-        return new Coordinate(Integer.parseInt(values[0]) , Integer.parseInt(values[1]));
+        return Coordinate.parse(value);
     }
 
     protected Option askOption() throws InvalidOptionException {
