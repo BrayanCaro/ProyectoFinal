@@ -21,4 +21,21 @@ public class MenuTest {
                 () -> classUnderTest.play()
         );
     }
+
+    @Test
+    public void playerCanQuitGameAfterStarting() throws Exception {
+        new Menu()
+            .setScanner(new Scanner("""
+                        1 # start game
+                        8 # rows
+                        8 # columns
+                        63 # bombs
+                        1 1
+                        v
+                        4 # exit
+                        """))
+            .play();
+
+        assertTrue(true);
+    }
 }
