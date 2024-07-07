@@ -125,37 +125,7 @@ public class Menu {
                             cronometro.interrupt();
                         } catch (Exception e) {}
 
-                        if (askShouldSaveGame()) {
-                            var username = new Prompt()
-                                .scanner(scanner)
-                                .title("¿Cual es tu nombre? ")
-                                .printTitleUsing(System.out::print)
-                                .ask()
-                                .toLowerCase()
-                                .trim();
-
-                            grabar(
-                                    tableroDelUsuario,
-                                    username,
-                                    bombas,
-                                    hola.tiempo
-                                  );
-
-                            guardarDatos();
-
-                            System.out.println( "¡Listo!, tu partida se ha guardado");
-                            System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
-
-                            scanner.nextLine();
-                            for (int i = 0; i < 45; i++) {
-                                System.out.println();
-                            }
-
-                        } else {
-                            System.out.println();
-                            break;
-                        }
-
+                        executeSaveGame(bombas, tableroDelUsuario);
                         option = Option.QUIT;
                     }
 
@@ -195,6 +165,41 @@ public class Menu {
                 }
             }
             case Option.QUIT -> System.out.println("Adios 👋");
+        }
+    }
+
+    private void executeSaveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        if (askShouldSaveGame()) {
+            saveGame(bombas, tableroDelUsuario);
+        } else {
+            System.out.println();
+        }
+    }
+
+    private void saveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        var username = new Prompt()
+            .scanner(scanner)
+            .title("¿Cual es tu nombre? ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .toLowerCase()
+            .trim();
+
+        grabar(
+                tableroDelUsuario,
+                username,
+                bombas,
+                hola.tiempo
+              );
+
+        guardarDatos();
+
+        System.out.println( "¡Listo!, tu partida se ha guardado");
+        System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
+
+        scanner.nextLine();
+        for (int i = 0; i < 45; i++) {
+            System.out.println();
         }
     }
 
