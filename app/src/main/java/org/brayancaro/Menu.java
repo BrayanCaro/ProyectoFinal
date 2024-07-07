@@ -151,8 +151,6 @@ public class Menu {
                         System.out.println(e);
                     } catch (IllegalAccessException e) {
                         System.out.println(e);
-                    } catch (ComandoErroneoExcepcion e) {
-                        System.out.println(e);
                     }
 
                     if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
@@ -165,48 +163,41 @@ public class Menu {
                         try {
                             cronometro.interrupt();
                         } catch (Exception e) {}
-                        boolean aux = true;
-                        do {
-                            System.out.print(
-                                "¿Quieres guardar tu partida? (s/n) "
-                            );
-                            String guardarPartida = scanner.nextLine();
-                            guardarPartida.toLowerCase();
 
-                            if (guardarPartida.contains("s")) {
-                                System.out.print("¿Cual es tu nombre? ");
-                                String usuario = scanner.nextLine();
-                                grabar(
+                        if (askShouldSaveGame()) {
+                            var username = new Prompt()
+                                .scanner(scanner)
+                                .title("¿Cual es tu nombre? ")
+                                .printTitleUsing(System.out::print)
+                                .ask()
+                                .toLowerCase()
+                                .trim();
+
+                            grabar(
                                     tableroDelUsuario,
-                                    usuario,
+                                    username,
                                     bombas,
                                     hola.tiempo
-                                );
-                                guardarDatos();
-                                System.out.print(
-                                    "¡Listo!, tu partida se ha guardado\n"
-                                );
-                                System.out.print(
-                                    "\n(Presiona la tecla \"↵\" para salir al menu)"
-                                );
-                                scanner.nextLine();
-                                for (int i = 0; i < 45; i++) {
-                                    System.out.println();
-                                }
-                                aux = false;
-                                option = Option.QUIT;
-                            } else if (guardarPartida.contains("n")) {
+                                  );
+
+                            guardarDatos();
+
+                            System.out.println( "¡Listo!, tu partida se ha guardado");
+                            System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
+
+                            scanner.nextLine();
+                            for (int i = 0; i < 45; i++) {
                                 System.out.println();
-                                aux = false;
-                                option = Option.QUIT;
-                                break;
-                            } else {
-                                System.out.println("Elije una opcion");
                             }
-                        } while (aux);
+
+                        } else {
+                            System.out.println();
+                            break;
+                        }
 
                         option = Option.QUIT;
                     }
+
                 } while (
                     tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
                     option != Option.QUIT
@@ -216,9 +207,7 @@ public class Menu {
             case Option.SHOW_HISTORY -> {
                 try {
                     tabla(cargarDatosDeUnArchivo());
-                    System.out.print(
-                        "(Presiona la tecla \"↵\" para salir al menu)"
-                    );
+                    System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
                     scanner.nextLine();
                     for (int i = 0; i < 45; i++) {
                         System.out.println();
@@ -246,6 +235,19 @@ public class Menu {
             }
             case Option.QUIT -> System.out.println("Adios 👋");
         }
+    }
+
+    private boolean askShouldSaveGame() {
+        Pattern pattern = Pattern.compile("\\s*[sn]\\s*", Pattern.CASE_INSENSITIVE);
+
+        return new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title("¿Quieres guardar tu partida? (s/n) ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .toLowerCase()
+            .contains("s");
     }
 
     private String askShouldReveal() {
