@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.InputMismatchException;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
@@ -32,9 +33,14 @@ public class Menu {
 
     protected Scanner scanner;
 
+    protected Random random;
+
     public static void main(String[] args) throws Exception {
         try (var scanner = new Scanner(System.in)) {
-            new Menu().setScanner(scanner).play();
+            new Menu()
+                .setScanner(scanner)
+                .random(new Random())
+                .play();
         }
     }
 
@@ -101,7 +107,8 @@ public class Menu {
                 var tableroDelUsuario = new TableroPersonalizado(
                     filas,
                     columnas,
-                    bombas
+                    bombas,
+                    random
                 );
 
                 tableroEstatico = tableroDelUsuario;
@@ -396,5 +403,11 @@ public class Menu {
                 i++;
             }
         } while (i < 20 && !aux);
+    }
+
+    public Menu random(Random random) {
+        this.random = random;
+
+        return this;
     }
 }
