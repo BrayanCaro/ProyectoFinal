@@ -8,6 +8,8 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    jacoco
+    alias(libs.plugins.sonarqube)
 }
 
 repositories {
@@ -33,4 +35,23 @@ application {
 
 tasks.getByName("run", JavaExec::class) {
  standardInput = System.`in`
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+
+    reports {
+      xml.required = true
+    }
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "BrayanCaro_ProyectoFinal")
+    property("sonar.organization", "brayancaro")
+    property("sonar.host.url", "https://sonarcloud.io")
+  }
 }

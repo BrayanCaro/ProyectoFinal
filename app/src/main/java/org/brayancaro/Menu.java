@@ -12,46 +12,60 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.SecureRandom;
 import java.util.InputMismatchException;
+import java.util.Random;
 import java.util.Scanner;
+import java.util.regex.Pattern;
+
+import org.brayancaro.enums.menu.Option;
+import org.brayancaro.enums.cell.State;
+import org.brayancaro.exceptions.menu.InvalidOptionException;
+import org.brayancaro.prompts.Prompt;
+import org.brayancaro.prompts.PromptInt;
+import org.brayancaro.records.Coordinate;
 
 public class Menu {
 
     private static TableroPersonalizado tableroEstatico;
     private static String[][] datos = new String[20][4];
-    private static boolean ayuda = true;
     static MiHilo hola = new MiHilo("hola");
     static Thread cronometro = new Thread(hola);
 
     protected Scanner scanner;
 
-    public static void main(String[] args) throws ComandoErroneoExcepcion, Exception {
+    protected Random random;
+
+    public static void main(String[] args) throws Exception {
         try (var scanner = new Scanner(System.in)) {
-            new Menu().setScanner(scanner).play();
+            new Menu()
+                .setScanner(scanner)
+                .random(new SecureRandom())
+                .play();
         }
     }
 
-    public void play() throws ComandoErroneoExcepcion, Exception {
-        int opcion;
+    public void play() throws Exception {
+        Option option = null;
+
         do {
-            menu();
-            opcion = Integer.parseInt(scanner.next());
-            if (ayuda) {
+            option = askOption();
+
+            try {
+                realizarAccion(option);
+            } catch (TocasteUnaBombaExcepcion e) {
+                tableroEstatico.mostrarTodasLasBombas();
+                System.out.println("\033[33m" + tableroEstatico + "\033[0m");
+                System.out.println(
+                        tableroEstatico.centrar() +
+                        " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
+                        );
                 try {
-                    realizarAccion(opcion);
-                } catch (TocasteUnaBombaExcepcion e) {
-                    tableroEstatico.mostrarTodasLasBombas();
-                    System.out.println("\033[33m" + tableroEstatico + "\033[0m");
-                    System.out.println(
-                            tableroEstatico.centrar() +
-                            " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
-                            );
-                    try {
-                        cronometro.interrupt();
-                    } catch (IllegalThreadStateException ee) {}
-                }
+                    cronometro.interrupt();
+                } catch (IllegalThreadStateException ee) {}
             }
-        } while (ayuda && opcion != 4);
+
+        } while (option != Option.QUIT);
     }
 
     public Menu setScanner(Scanner scanner) {
@@ -61,93 +75,43 @@ public class Menu {
     }
 
     /**
-     * Metodo estatico que solo imprime el menu
-     */
-    private static void menu() {
-        System.out.println(" ⧄------------------------------------⧅");
-        System.out.println(" |          ¿Que quieres hacer?       |");
-        System.out.println(" | 1. Jugar una partida personalizada |");
-        System.out.println(" | 2. Ver registros                   |");
-        System.out.println(" | 3. Borrar registros                |");
-        System.out.println(" | 4. Salir                           |");
-        System.out.println(" ⧅------------------------------------⧄");
-    }
-
-    /**
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
-     * @param opcion -- Indica la opcion a realizar
      */
-    public void realizarAccion(int opciones)
-        throws TocasteUnaBombaExcepcion, ComandoErroneoExcepcion, Exception {
-        switch (opciones) {
-            case 1:
-                System.out.print("¿Con cuantas filas? ");
-                int filas = Integer.parseInt(scanner.next());
+    public void realizarAccion(Option option)
+        throws TocasteUnaBombaExcepcion, Exception {
+        switch (option) {
+            case Option.START -> {
+                var filas = new PromptInt()
+                    .min(8)
+                    .max(29)
+                    .scanner(scanner)
+                    .title("¿Con cuantas filas? ")
+                    .printTitleUsing(System.out::print)
+                    .ask();
 
-                try {
-                    if (filas < 8) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 8 o mas filas"
-                        );
-                    }
-                    if (filas > 29) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 29 o menos filas"
-                        );
-                    }
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e);
-                    realizarAccion(1);
-                } catch (InputMismatchException e) {
-                    System.out.println(
-                        "Las columas solo se escriben con numeros\n"
-                    );
-                }
+                var columnas = new PromptInt()
+                    .min(8)
+                    .max(29)
+                    .scanner(scanner)
+                    .title("¿Con cuantas columnas? ")
+                    .printTitleUsing(System.out::print)
+                    .ask();
 
-                System.out.print("¿Con cuantas columnas? ");
-                int columnas = Integer.parseInt(scanner.next());
-                try {
-                    if (columnas < 8) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 8 o mas columnas"
-                        );
-                    }
-                    if (columnas > 29) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner 29 0 menos columnas"
-                        );
-                    }
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e);
-                    realizarAccion(1);
-                }
+                var bombas = new PromptInt()
+                    .min(1)
+                    .max((filas * columnas) - 1)
+                    .scanner(scanner)
+                    .title("¿Con cuantas bombas? ")
+                    .printTitleUsing(System.out::print)
+                    .ask();
 
-                System.out.print("¿Con cuantas bombas? ");
-                int bombas = Integer.parseInt(scanner.next());
-
-                TableroPersonalizado tableroDelUsuario;
-
-                try {
-                    if (bombas <= 0) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner mas bombas"
-                        );
-                    }
-                    if (bombas >= (filas * columnas)) {
-                        throw new IllegalArgumentException(
-                            "Necesitas poner menos bombas"
-                        );
-                    }
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e);
-                    realizarAccion(1);
-                }
-
-                tableroDelUsuario = new TableroPersonalizado(
+                var tableroDelUsuario = new TableroPersonalizado(
                     filas,
                     columnas,
-                    bombas
+                    bombas,
+                    random
                 );
+
                 tableroEstatico = tableroDelUsuario;
                 System.out.println(tableroDelUsuario);
                 System.out.println("EMPECEMOS");
@@ -156,87 +120,7 @@ public class Menu {
                     cronometro.start();
                 } catch (Exception e) {}
                 do {
-                    System.out.print("Introduce la cordenada > ");
-                    String comando = scanner.nextLine();
-                    comando.trim();
-                    if (comando.contains(" ")) {
-                        try {
-                            String[] resultados = comando.split(" ");
-                            if (!comando.contains(" ")) {
-                                throw new ComandoErroneoExcepcion(
-                                    "Comando erroneo, pon solo 2 numeros separados por un espacio"
-                                );
-                            }
-                            if (resultados.length != 2) {
-                                throw new ComandoErroneoExcepcion(
-                                    "Comando erroneo, pon solo 2 numeros separados por un espacio"
-                                );
-                            }
-
-                            int cordenadaX = Integer.parseInt(resultados[0]);
-                            if (cordenadaX < 0) {
-                                throw new IndexOutOfBoundsException(
-                                    "Introduce numeros positivos"
-                                );
-                            }
-                            int cordenadaY = Integer.parseInt(resultados[1]);
-                            if (cordenadaY < 0) {
-                                throw new IndexOutOfBoundsException(
-                                    "Introduce numeros positivos"
-                                );
-                            }
-
-                            System.out.print(
-                                "¿Quieres marcar o ver esa celda? (m/v) "
-                            );
-                            comando = scanner.nextLine();
-                            comando.trim().toLowerCase();
-
-                            if (comando.contains("m")) {
-                                System.out.println(comando.contains("m"));
-                                tableroDelUsuario.marcarCelda(
-                                    cordenadaY - 1,
-                                    cordenadaX - 1
-                                );
-                            } else if (comando.contains("v")) {
-                                tableroDelUsuario.elegirCelda(
-                                    cordenadaY - 1,
-                                    cordenadaX - 1
-                                );
-                            } else {
-                                throw new InputMismatchException(
-                                    "Por favor Introduce \"m\" o \"v\""
-                                );
-                            }
-                            System.out.println(
-                                "Quedan " +
-                                tableroDelUsuario.jugadorGanoSinMarcas() +
-                                " casillas sin ver."
-                            );
-                            System.out.println(
-                                "Hay " + bombas + " bombas en el mapa"
-                            );
-                            System.out.println(tableroDelUsuario);
-                        } catch (NumberFormatException e) {
-                            System.out.println(
-                                "El comando solo puede tener 2 numeros separados por un espacio"
-                            );
-                        } catch (InputMismatchException e) {
-                            System.out.println(e);
-                        } catch (IndexOutOfBoundsException e) {
-                            System.out.println(e);
-                        } catch (IllegalAccessException e) {
-                            System.out.println(e);
-                        } catch (ComandoErroneoExcepcion e) {
-                            System.out.println(e);
-                        }
-                    } else {
-                        try {
-                            throw new InputMismatchException("Comando erroneo");
-                        } catch (InputMismatchException e) {
-                            System.out.println(e);
-                        }
-                    }
+                    executeChangeCellState(bombas, tableroDelUsuario);
 
                     if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
                         tableroDelUsuario.ganador();
@@ -248,92 +132,155 @@ public class Menu {
                         try {
                             cronometro.interrupt();
                         } catch (Exception e) {}
-                        boolean aux = true;
-                        do {
-                            System.out.print(
-                                "¿Quieres guardar tu partida? (s/n) "
-                            );
-                            String guardarPartida = scanner.nextLine();
-                            guardarPartida.toLowerCase();
 
-                            if (guardarPartida.contains("s")) {
-                                System.out.print("¿Cual es tu nombre? ");
-                                String usuario = scanner.nextLine();
-                                grabar(
-                                    tableroDelUsuario,
-                                    usuario,
-                                    bombas,
-                                    hola.tiempo
-                                );
-                                guardarDatos();
-                                System.out.print(
-                                    "¡Listo!, tu partida se ha guardado\n"
-                                );
-                                System.out.print(
-                                    "\n(Presiona la tecla \"↵\" para salir al menu)"
-                                );
-                                scanner.nextLine();
-                                for (int i = 0; i < 45; i++) {
-                                    System.out.println();
-                                }
-                                aux = false;
-                                opciones = 4;
-                            } else if (guardarPartida.contains("n")) {
-                                System.out.println();
-                                aux = false;
-                                opciones = 4;
-                                break;
-                            } else {
-                                System.out.println("Elije una opcion");
-                            }
-                        } while (aux);
-
-                        opciones = 4;
+                        executeSaveGame(bombas, tableroDelUsuario);
+                        option = Option.QUIT;
                     }
+
                 } while (
                     tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
-                    opciones != 4
+                    option != Option.QUIT
                 );
-                break;
-            case 2:
+            }
+
+            case Option.SHOW_HISTORY -> {
                 try {
                     tabla(cargarDatosDeUnArchivo());
-                    System.out.print(
-                        "(Presiona la tecla \"↵\" para salir al menu)"
-                    );
+                    System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
                     scanner.nextLine();
                     for (int i = 0; i < 45; i++) {
                         System.out.println();
                     }
                 } catch (FileNotFoundException e) {
                     System.out.println(
-                        "¡Ups!, parece que no has jugado una partida."
-                    );
-                    System.out.println(
-                        "Pero si ya jugaste asegurate de que el archivo \"listaDeTablas.minas\" esta en la misma carpeta.\n"
-                    );
-                } catch (IllegalArgumentException e) {
-                    System.out.println(
-                        "No hay nada que mostrar, juega y guarda una partida\n"
+                        """
+                        ¡Ups!, parece que no has jugado una partida.
+                        Pero si ya jugaste asegurate de que el archivo "listaDeTablas.minas" esta en la misma carpeta."""
                     );
                 }
-                break;
-            case 3:
+            }
+            case Option.DELETE_HISTORY -> {
                 try {
                     borrarDatos();
                     System.out.println("Listo!, datos borrados\n");
                 } catch (NullPointerException e) {
                     System.out.println("No hay nada que borrar\n");
                 }
-                break;
-            case 4:
-                System.out.println("Adios 👋");
-                ayuda = false;
-                break;
-            default:
-                System.out.println("Esa opcion no se puede elegir\n");
-                break;
+            }
+            case Option.QUIT -> System.out.println("Adios 👋");
         }
+    }
+
+    private void executeSaveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        if (askShouldSaveGame()) {
+            saveGame(bombas, tableroDelUsuario);
+        } else {
+            System.out.println();
+        }
+    }
+
+    private void saveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        var username = new Prompt()
+            .scanner(scanner)
+            .title("¿Cual es tu nombre? ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .toLowerCase()
+            .trim();
+
+        grabar(
+                tableroDelUsuario,
+                username,
+                bombas,
+                hola.tiempo
+              );
+
+        guardarDatos();
+
+        System.out.println( "¡Listo!, tu partida se ha guardado");
+        System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
+
+        scanner.nextLine();
+        for (int i = 0; i < 45; i++) {
+            System.out.println();
+        }
+    }
+
+    private void executeChangeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario) throws Exception {
+        var coordinate = askCoordinate();
+        var stateAction = askShouldReveal();
+        changeCellState(bombas, tableroDelUsuario, coordinate, stateAction);
+    }
+
+    private void changeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario, Coordinate coordinate,
+            State stateAction) throws Exception {
+        try {
+            tableroDelUsuario.execute(coordinate, stateAction);
+            System.out.printf("""
+                    Quedan %d casillas sin ver.
+                    Hay %s bombas en el mapa
+                    """, tableroDelUsuario.jugadorGanoSinMarcas(), bombas);
+            System.out.println(tableroDelUsuario);
+        } catch (NumberFormatException e) {
+            System.out.println("El comando solo puede tener 2 numeros separados por un espacio");
+        } catch (InputMismatchException e) {
+            System.out.println(e);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println(e);
+        } catch (IllegalAccessException e) {
+            System.out.println(e);
+        }
+    }
+
+    private boolean askShouldSaveGame() {
+        Pattern pattern = Pattern.compile("\\s*[sn]\\s*", Pattern.CASE_INSENSITIVE);
+
+        return new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title("¿Quieres guardar tu partida? (s/n) ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .toLowerCase()
+            .contains("s");
+    }
+
+    private State askShouldReveal() {
+        Pattern pattern = Pattern.compile("\\s*[mv]\\s*", Pattern.CASE_INSENSITIVE);
+
+        var isRevealed = new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title( "¿Quieres marcar o ver esa celda? (m/v) ")
+            .printTitleUsing(System.out::print)
+            .ask()
+            .trim()
+            .toLowerCase()
+            .contains("v");
+
+        return isRevealed ? State.REVEALED : State.MARKED;
+    }
+
+    private Coordinate askCoordinate() {
+        Pattern pattern = Pattern.compile(Coordinate.PATTERN);
+
+        var value = new Prompt()
+            .pattern(pattern)
+            .scanner(scanner)
+            .title("Introduce la cordenada > ")
+            .printTitleUsing(System.out::print)
+            .ask();
+
+        return Coordinate.parse(value);
+    }
+
+    protected Option askOption() throws InvalidOptionException {
+        return Option.fromIndex(new PromptInt()
+            .min(1)
+            .max(4)
+            .scanner(scanner)
+            .title(Option.getPrintOptionsText())
+            .ask());
     }
 
     /**
@@ -343,11 +290,11 @@ public class Menu {
      * @throws RuntimeException -- Si el archivo no puede ser leido, o si el archivo no puede ser escrito
      */
     public static void guardarDatos() throws IOException {
-        ObjectOutputStream guardarTabla = new ObjectOutputStream(
+        try (var guardarTabla = new ObjectOutputStream(
             new FileOutputStream("listaDeTablas.minas")
-        );
-        guardarTabla.writeObject(Menu.datos);
-        guardarTabla.close();
+        )) {
+            guardarTabla.writeObject(Menu.datos);
+        }
     }
 
     /**
@@ -370,23 +317,24 @@ public class Menu {
             }
         }
 
-        ObjectOutputStream guardarTabla = new ObjectOutputStream(
+        try (var guardarTabla = new ObjectOutputStream(
             new FileOutputStream("listaDeTablas.minas")
-        );
-        guardarTabla.writeObject(listaVacia);
-        guardarTabla.close();
+        )) {
+            guardarTabla.writeObject(listaVacia);
+        }
     }
 
     /**
      * Metodo para cargar una partida de un archivo
      * @param nombreDelArchivo -- Refiere al nombre del archivo que contiene las partidas
      */
-    public static String[][] cargarDatosDeUnArchivo() throws Exception {
-        ObjectInputStream celdasParaCargar = new ObjectInputStream(
+    public static String[][] cargarDatosDeUnArchivo() throws IOException, ClassNotFoundException {
+        try (var stream = new ObjectInputStream(
             new FileInputStream("listaDeTablas.minas")
-        );
-        Menu.datos = (String[][]) celdasParaCargar.readObject();
-        return Menu.datos;
+        )) {
+            Menu.datos = (String[][]) stream.readObject();
+            return Menu.datos;
+        }
     }
 
     /**
@@ -452,5 +400,11 @@ public class Menu {
                 i++;
             }
         } while (i < 20 && !aux);
+    }
+
+    public Menu random(Random random) {
+        this.random = random;
+
+        return this;
     }
 }
