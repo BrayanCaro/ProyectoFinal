@@ -28,8 +28,4 @@ public enum Option {
             | 4. Salir                           |
             ⧅------------------------------------⧄""";
     }
-
-    public static void printOptionsText() {
-        System.out.println(getPrintOptionsText());
-    }
 }
