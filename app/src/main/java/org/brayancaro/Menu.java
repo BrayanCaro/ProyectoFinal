@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.SecureRandom;
 import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
@@ -39,7 +40,7 @@ public class Menu {
         try (var scanner = new Scanner(System.in)) {
             new Menu()
                 .setScanner(scanner)
-                .random(new Random())
+                .random(new SecureRandom())
                 .play();
         }
     }
