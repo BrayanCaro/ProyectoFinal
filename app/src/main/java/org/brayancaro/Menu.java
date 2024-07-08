@@ -152,14 +152,9 @@ public class Menu {
                     }
                 } catch (FileNotFoundException e) {
                     System.out.println(
-                        "¡Ups!, parece que no has jugado una partida."
-                    );
-                    System.out.println(
-                        "Pero si ya jugaste asegurate de que el archivo \"listaDeTablas.minas\" esta en la misma carpeta.\n"
-                    );
-                } catch (IllegalArgumentException e) {
-                    System.out.println(
-                        "No hay nada que mostrar, juega y guarda una partida\n"
+                        """
+                        ¡Ups!, parece que no has jugado una partida.
+                        Pero si ya jugaste asegurate de que el archivo "listaDeTablas.minas" esta en la misma carpeta."""
                     );
                 }
             }
@@ -294,11 +289,11 @@ public class Menu {
      * @throws RuntimeException -- Si el archivo no puede ser leido, o si el archivo no puede ser escrito
      */
     public static void guardarDatos() throws IOException {
-        ObjectOutputStream guardarTabla = new ObjectOutputStream(
+        try (var guardarTabla = new ObjectOutputStream(
             new FileOutputStream("listaDeTablas.minas")
-        );
-        guardarTabla.writeObject(Menu.datos);
-        guardarTabla.close();
+        )) {
+            guardarTabla.writeObject(Menu.datos);
+        }
     }
 
     /**
@@ -321,23 +316,24 @@ public class Menu {
             }
         }
 
-        ObjectOutputStream guardarTabla = new ObjectOutputStream(
+        try (var guardarTabla = new ObjectOutputStream(
             new FileOutputStream("listaDeTablas.minas")
-        );
-        guardarTabla.writeObject(listaVacia);
-        guardarTabla.close();
+        )) {
+            guardarTabla.writeObject(listaVacia);
+        }
     }
 
     /**
      * Metodo para cargar una partida de un archivo
      * @param nombreDelArchivo -- Refiere al nombre del archivo que contiene las partidas
      */
-    public static String[][] cargarDatosDeUnArchivo() throws Exception {
-        ObjectInputStream celdasParaCargar = new ObjectInputStream(
+    public static String[][] cargarDatosDeUnArchivo() throws IOException, ClassNotFoundException {
+        try (var stream = new ObjectInputStream(
             new FileInputStream("listaDeTablas.minas")
-        );
-        Menu.datos = (String[][]) celdasParaCargar.readObject();
-        return Menu.datos;
+        )) {
+            Menu.datos = (String[][]) stream.readObject();
+            return Menu.datos;
+        }
     }
 
     /**
