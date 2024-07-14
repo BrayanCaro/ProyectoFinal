@@ -3,14 +3,21 @@
  */
 package org.brayancaro;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.util.Random;
 import java.util.Scanner;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class MenuTest {
+    @Before
+    public void init() {
+        new File(Menu.SAVED_FILE_PATH).delete();
+    }
 
     @Test
     public void menuFailsWithInvalidInput() {
@@ -119,6 +126,56 @@ public class MenuTest {
                         1 1
                         v
                         4 # exit
+                        """))
+            .play();
+
+        assertTrue(true);
+    }
+
+    @Test
+    public void playerCanEraseData() throws Exception {
+        new Menu()
+            .random(new Random(120))
+            .setScanner(new Scanner("""
+                        1 # start game
+                        8 # rows
+                        8 # columns
+                        1 # bombs
+                        1 1
+                        v
+                        s
+                        name-for-saving-game
+
+                        2 # see game
+
+                        3
+                        4
+                        """))
+            .play();
+
+        assertTrue(true);
+    }
+
+    @Test
+    public void playerCannotEraseMissingFile() throws Exception {
+        new Menu()
+            .random(new Random(120))
+            .setScanner(new Scanner("""
+                        3
+                        4
+                        """))
+            .play();
+
+        assertTrue(true);
+    }
+
+    @Test
+    public void playerCannotSeeMissingFile() throws Exception {
+        new Menu()
+            .random(new Random(120))
+            .setScanner(new Scanner("""
+                        2
+                        4
                         """))
             .play();
 

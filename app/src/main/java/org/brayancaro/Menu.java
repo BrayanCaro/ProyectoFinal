@@ -26,6 +26,7 @@ import org.brayancaro.prompts.PromptInt;
 import org.brayancaro.records.Coordinate;
 
 public class Menu {
+    public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
 
     private static TableroPersonalizado tableroEstatico;
     private static String[][] datos = new String[20][4];
@@ -291,7 +292,7 @@ public class Menu {
      */
     public static void guardarDatos() throws IOException {
         try (var guardarTabla = new ObjectOutputStream(
-            new FileOutputStream("listaDeTablas.minas")
+            new FileOutputStream(SAVED_FILE_PATH)
         )) {
             guardarTabla.writeObject(Menu.datos);
         }
@@ -318,7 +319,7 @@ public class Menu {
         }
 
         try (var guardarTabla = new ObjectOutputStream(
-            new FileOutputStream("listaDeTablas.minas")
+            new FileOutputStream(SAVED_FILE_PATH)
         )) {
             guardarTabla.writeObject(listaVacia);
         }
@@ -330,7 +331,7 @@ public class Menu {
      */
     public static String[][] cargarDatosDeUnArchivo() throws IOException, ClassNotFoundException {
         try (var stream = new ObjectInputStream(
-            new FileInputStream("listaDeTablas.minas")
+            new FileInputStream(SAVED_FILE_PATH)
         )) {
             Menu.datos = (String[][]) stream.readObject();
             return Menu.datos;
