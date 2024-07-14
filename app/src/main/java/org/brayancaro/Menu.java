@@ -50,21 +50,7 @@ public class Menu {
 
         do {
             option = askOption();
-
-            try {
-                realizarAccion(option);
-            } catch (TocasteUnaBombaExcepcion e) {
-                tableroEstatico.mostrarTodasLasBombas();
-                System.out.println("\033[33m" + tableroEstatico + "\033[0m");
-                System.out.println(
-                        tableroEstatico.centrar() +
-                        " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
-                        );
-                try {
-                    cronometro.interrupt();
-                } catch (IllegalThreadStateException ee) {}
-            }
-
+            realizarAccion(option);
         } while (option != Option.QUIT);
     }
 
@@ -77,8 +63,7 @@ public class Menu {
     /**
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
      */
-    public void realizarAccion(Option option)
-        throws TocasteUnaBombaExcepcion, Exception {
+    public void realizarAccion(Option option) throws Exception {
         switch (option) {
             case Option.START -> startGame(option);
             case Option.SHOW_HISTORY -> {
@@ -149,7 +134,18 @@ public class Menu {
             cronometro.start();
         } catch (Exception e) {}
         do {
-            executeChangeCellState(bombas, tableroDelUsuario);
+            try {
+                executeChangeCellState(bombas, tableroDelUsuario);
+            } catch (TocasteUnaBombaExcepcion e) {
+                tableroEstatico.mostrarTodasLasBombas();
+                System.out.println("\033[33m" + tableroEstatico + "\033[0m");
+                System.out.println(tableroEstatico.centrar() + " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n");
+                try {
+                    cronometro.interrupt();
+                } catch (IllegalThreadStateException ee) {}
+
+                break;
+            }
             option = handleWinningState(option, bombas, tableroDelUsuario);
         } while (
             tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
