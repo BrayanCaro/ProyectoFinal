@@ -26,6 +26,7 @@ import org.brayancaro.prompts.PromptInt;
 import org.brayancaro.records.Coordinate;
 
 public class Menu {
+    public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
 
     private static TableroPersonalizado tableroEstatico;
     private static String[][] datos = new String[20][4];
@@ -50,21 +51,7 @@ public class Menu {
 
         do {
             option = askOption();
-
-            try {
-                realizarAccion(option);
-            } catch (TocasteUnaBombaExcepcion e) {
-                tableroEstatico.mostrarTodasLasBombas();
-                System.out.println("\033[33m" + tableroEstatico + "\033[0m");
-                System.out.println(
-                        tableroEstatico.centrar() +
-                        " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n"
-                        );
-                try {
-                    cronometro.interrupt();
-                } catch (IllegalThreadStateException ee) {}
-            }
-
+            realizarAccion(option);
         } while (option != Option.QUIT);
     }
 
@@ -77,72 +64,9 @@ public class Menu {
     /**
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
      */
-    public void realizarAccion(Option option)
-        throws TocasteUnaBombaExcepcion, Exception {
+    public void realizarAccion(Option option) throws Exception {
         switch (option) {
-            case Option.START -> {
-                var filas = new PromptInt()
-                    .min(8)
-                    .max(29)
-                    .scanner(scanner)
-                    .title("¿Con cuantas filas? ")
-                    .printTitleUsing(System.out::print)
-                    .ask();
-
-                var columnas = new PromptInt()
-                    .min(8)
-                    .max(29)
-                    .scanner(scanner)
-                    .title("¿Con cuantas columnas? ")
-                    .printTitleUsing(System.out::print)
-                    .ask();
-
-                var bombas = new PromptInt()
-                    .min(1)
-                    .max((filas * columnas) - 1)
-                    .scanner(scanner)
-                    .title("¿Con cuantas bombas? ")
-                    .printTitleUsing(System.out::print)
-                    .ask();
-
-                var tableroDelUsuario = new TableroPersonalizado(
-                    filas,
-                    columnas,
-                    bombas,
-                    random
-                );
-
-                tableroEstatico = tableroDelUsuario;
-                System.out.println(tableroDelUsuario);
-                System.out.println("EMPECEMOS");
-                System.out.println("Hay " + bombas + " bombas en el mapa");
-                try {
-                    cronometro.start();
-                } catch (Exception e) {}
-                do {
-                    executeChangeCellState(bombas, tableroDelUsuario);
-
-                    if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
-                        tableroDelUsuario.ganador();
-                        System.out.println("\n" + tableroDelUsuario);
-                        System.out.println(
-                            tableroEstatico.centrar() +
-                            " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n"
-                        );
-                        try {
-                            cronometro.interrupt();
-                        } catch (Exception e) {}
-
-                        executeSaveGame(bombas, tableroDelUsuario);
-                        option = Option.QUIT;
-                    }
-
-                } while (
-                    tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
-                    option != Option.QUIT
-                );
-            }
-
+            case Option.START -> startGame(option);
             case Option.SHOW_HISTORY -> {
                 try {
                     tabla(cargarDatosDeUnArchivo());
@@ -169,6 +93,83 @@ public class Menu {
             }
             case Option.QUIT -> System.out.println("Adios 👋");
         }
+    }
+
+    private void startGame(Option option) throws Exception, IOException {
+        var filas = new PromptInt()
+            .min(8)
+            .max(29)
+            .scanner(scanner)
+            .title("¿Con cuantas filas? ")
+            .printTitleUsing(System.out::print)
+            .ask();
+
+        var columnas = new PromptInt()
+            .min(8)
+            .max(29)
+            .scanner(scanner)
+            .title("¿Con cuantas columnas? ")
+            .printTitleUsing(System.out::print)
+            .ask();
+
+        var bombas = new PromptInt()
+            .min(1)
+            .max((filas * columnas) - 1)
+            .scanner(scanner)
+            .title("¿Con cuantas bombas? ")
+            .printTitleUsing(System.out::print)
+            .ask();
+
+        var tableroDelUsuario = new TableroPersonalizado(
+                filas,
+                columnas,
+                bombas,
+                random
+        );
+
+        tableroEstatico = tableroDelUsuario;
+        System.out.println(tableroDelUsuario);
+        System.out.println("EMPECEMOS");
+        System.out.println("Hay " + bombas + " bombas en el mapa");
+        try {
+            cronometro.start();
+        } catch (Exception e) {}
+        do {
+            try {
+                executeChangeCellState(bombas, tableroDelUsuario);
+            } catch (TocasteUnaBombaExcepcion e) {
+                tableroEstatico.mostrarTodasLasBombas();
+                System.out.println("\033[33m" + tableroEstatico + "\033[0m");
+                System.out.println(tableroEstatico.centrar() + " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n");
+                try {
+                    cronometro.interrupt();
+                } catch (IllegalThreadStateException ee) {}
+
+                break;
+            }
+            option = handleWinningState(option, bombas, tableroDelUsuario);
+        } while (
+            tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
+            option != Option.QUIT
+        );
+    }
+
+    private Option handleWinningState(Option option, Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
+            tableroDelUsuario.ganador();
+            System.out.println("\n" + tableroDelUsuario);
+            System.out.println(
+                tableroEstatico.centrar() +
+                " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n"
+            );
+            try {
+                cronometro.interrupt();
+            } catch (Exception e) {}
+
+            executeSaveGame(bombas, tableroDelUsuario);
+            option = Option.QUIT;
+        }
+        return option;
     }
 
     private void executeSaveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
@@ -291,7 +292,7 @@ public class Menu {
      */
     public static void guardarDatos() throws IOException {
         try (var guardarTabla = new ObjectOutputStream(
-            new FileOutputStream("listaDeTablas.minas")
+            new FileOutputStream(SAVED_FILE_PATH)
         )) {
             guardarTabla.writeObject(Menu.datos);
         }
@@ -318,7 +319,7 @@ public class Menu {
         }
 
         try (var guardarTabla = new ObjectOutputStream(
-            new FileOutputStream("listaDeTablas.minas")
+            new FileOutputStream(SAVED_FILE_PATH)
         )) {
             guardarTabla.writeObject(listaVacia);
         }
@@ -330,7 +331,7 @@ public class Menu {
      */
     public static String[][] cargarDatosDeUnArchivo() throws IOException, ClassNotFoundException {
         try (var stream = new ObjectInputStream(
-            new FileInputStream("listaDeTablas.minas")
+            new FileInputStream(SAVED_FILE_PATH)
         )) {
             Menu.datos = (String[][]) stream.readObject();
             return Menu.datos;
