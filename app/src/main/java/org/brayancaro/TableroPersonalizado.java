@@ -7,7 +7,6 @@
  */
 package org.brayancaro;
 
-import java.io.*;
 import java.util.Random;
 
 import org.brayancaro.enums.cell.State;
@@ -438,34 +437,6 @@ public class TableroPersonalizado extends Tablero {
     public void marcarCelda(Coordinate coordinate) throws IndexOutOfBoundsException, IllegalAccessException {
         // FIXME: resolve wrong parameters, affects only non quadratic boards
         marcarCelda(coordinate.y(), coordinate.x());
-    }
-
-    /**
-     * Metodo para guardar una partida
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que centendra la partida
-     * @throws FileNotFoundException -- Si el archio no es encontrado
-     * @throws RuntimeException -- Si el archivo no puede ser leido, o si el archivo no puede ser escrito
-     */
-    public void guardarPartidaEnUnArchivo(String nombreDelArchivo)
-        throws IOException {
-        ObjectOutputStream celdasParaGrabar = new ObjectOutputStream(
-            new FileOutputStream(nombreDelArchivo)
-        );
-        celdasParaGrabar.writeObject(this.celdas);
-        celdasParaGrabar.close();
-    }
-
-    /**
-     * Metodo para cargar una partida de un archivo
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que contiene las partidas
-     */
-    public Celdas[][] cargarPartidaDeUnArchivo(String nombreDelArchivo)
-        throws Exception {
-        ObjectInputStream celdasParaCargar = new ObjectInputStream(
-            new FileInputStream(nombreDelArchivo)
-        );
-        this.celdas = (Celdas[][]) celdasParaCargar.readObject();
-        return this.celdas;
     }
 
     /**
