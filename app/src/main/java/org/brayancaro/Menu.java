@@ -28,7 +28,6 @@ import org.brayancaro.records.Coordinate;
 public class Menu {
     public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
 
-    private static TableroPersonalizado tableroEstatico;
     private static String[][] datos = new String[20][4];
     static MiHilo hola = new MiHilo("hola");
     static Thread cronometro = new Thread(hola);
@@ -120,15 +119,14 @@ public class Menu {
             .printTitleUsing(System.out::print)
             .ask();
 
-        var tableroDelUsuario = new TableroPersonalizado(
+        var board = new TableroPersonalizado(
                 filas,
                 columnas,
                 bombas,
                 random
         );
 
-        tableroEstatico = tableroDelUsuario;
-        System.out.println(tableroDelUsuario);
+        System.out.println(board);
         System.out.println("EMPECEMOS");
         System.out.println("Hay " + bombas + " bombas en el mapa");
         try {
@@ -136,37 +134,37 @@ public class Menu {
         } catch (Exception e) {}
         do {
             try {
-                executeChangeCellState(bombas, tableroDelUsuario);
+                executeChangeCellState(bombas, board);
             } catch (TocasteUnaBombaExcepcion e) {
-                tableroEstatico.mostrarTodasLasBombas();
-                System.out.println("\033[33m" + tableroEstatico + "\033[0m");
-                System.out.println(tableroEstatico.centrar() + " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n");
+                board.mostrarTodasLasBombas();
+                System.out.println("\033[33m" + board + "\033[0m");
+                System.out.println(board.centrar() + " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n");
                 try {
                     cronometro.interrupt();
                 } catch (IllegalThreadStateException ee) {}
 
                 break;
             }
-            option = handleWinningState(option, bombas, tableroDelUsuario);
+            option = handleWinningState(option, bombas, board);
         } while (
-            tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
+            board.jugadorGanoSinMarcas() != bombas &&
             option != Option.QUIT
         );
     }
 
-    private Option handleWinningState(Option option, Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
-        if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
-            tableroDelUsuario.ganador();
-            System.out.println("\n" + tableroDelUsuario);
+    private Option handleWinningState(Option option, Integer bombas, TableroPersonalizado board) throws IOException {
+        if (board.jugadorGanoSinMarcas() == bombas) {
+            board.ganador();
+            System.out.println("\n" + board);
             System.out.println(
-                tableroEstatico.centrar() +
+                board.centrar() +
                 " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n"
             );
             try {
                 cronometro.interrupt();
             } catch (Exception e) {}
 
-            executeSaveGame(bombas, tableroDelUsuario);
+            executeSaveGame(bombas, board);
             option = Option.QUIT;
         }
         return option;
