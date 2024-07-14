@@ -80,69 +80,7 @@ public class Menu {
     public void realizarAccion(Option option)
         throws TocasteUnaBombaExcepcion, Exception {
         switch (option) {
-            case Option.START -> {
-                var filas = new PromptInt()
-                    .min(8)
-                    .max(29)
-                    .scanner(scanner)
-                    .title("¿Con cuantas filas? ")
-                    .printTitleUsing(System.out::print)
-                    .ask();
-
-                var columnas = new PromptInt()
-                    .min(8)
-                    .max(29)
-                    .scanner(scanner)
-                    .title("¿Con cuantas columnas? ")
-                    .printTitleUsing(System.out::print)
-                    .ask();
-
-                var bombas = new PromptInt()
-                    .min(1)
-                    .max((filas * columnas) - 1)
-                    .scanner(scanner)
-                    .title("¿Con cuantas bombas? ")
-                    .printTitleUsing(System.out::print)
-                    .ask();
-
-                var tableroDelUsuario = new TableroPersonalizado(
-                    filas,
-                    columnas,
-                    bombas,
-                    random
-                );
-
-                tableroEstatico = tableroDelUsuario;
-                System.out.println(tableroDelUsuario);
-                System.out.println("EMPECEMOS");
-                System.out.println("Hay " + bombas + " bombas en el mapa");
-                try {
-                    cronometro.start();
-                } catch (Exception e) {}
-                do {
-                    executeChangeCellState(bombas, tableroDelUsuario);
-
-                    if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
-                        tableroDelUsuario.ganador();
-                        System.out.println("\n" + tableroDelUsuario);
-                        System.out.println(
-                            tableroEstatico.centrar() +
-                            " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n"
-                        );
-                        try {
-                            cronometro.interrupt();
-                        } catch (Exception e) {}
-
-                        executeSaveGame(bombas, tableroDelUsuario);
-                        option = Option.QUIT;
-                    }
-
-                } while (
-                    tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
-                    option != Option.QUIT
-                );
-            }
-
+            case Option.START -> startGame(option);
             case Option.SHOW_HISTORY -> {
                 try {
                     tabla(cargarDatosDeUnArchivo());
@@ -169,6 +107,72 @@ public class Menu {
             }
             case Option.QUIT -> System.out.println("Adios 👋");
         }
+    }
+
+    private void startGame(Option option) throws Exception, IOException {
+        var filas = new PromptInt()
+            .min(8)
+            .max(29)
+            .scanner(scanner)
+            .title("¿Con cuantas filas? ")
+            .printTitleUsing(System.out::print)
+            .ask();
+
+        var columnas = new PromptInt()
+            .min(8)
+            .max(29)
+            .scanner(scanner)
+            .title("¿Con cuantas columnas? ")
+            .printTitleUsing(System.out::print)
+            .ask();
+
+        var bombas = new PromptInt()
+            .min(1)
+            .max((filas * columnas) - 1)
+            .scanner(scanner)
+            .title("¿Con cuantas bombas? ")
+            .printTitleUsing(System.out::print)
+            .ask();
+
+        var tableroDelUsuario = new TableroPersonalizado(
+                filas,
+                columnas,
+                bombas,
+                random
+        );
+
+        tableroEstatico = tableroDelUsuario;
+        System.out.println(tableroDelUsuario);
+        System.out.println("EMPECEMOS");
+        System.out.println("Hay " + bombas + " bombas en el mapa");
+        try {
+            cronometro.start();
+        } catch (Exception e) {}
+        do {
+            executeChangeCellState(bombas, tableroDelUsuario);
+            option = handleWinningState(option, bombas, tableroDelUsuario);
+        } while (
+            tableroDelUsuario.jugadorGanoSinMarcas() != bombas &&
+            option != Option.QUIT
+        );
+    }
+
+    private Option handleWinningState(Option option, Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+        if (tableroDelUsuario.jugadorGanoSinMarcas() == bombas) {
+            tableroDelUsuario.ganador();
+            System.out.println("\n" + tableroDelUsuario);
+            System.out.println(
+                tableroEstatico.centrar() +
+                " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n"
+            );
+            try {
+                cronometro.interrupt();
+            } catch (Exception e) {}
+
+            executeSaveGame(bombas, tableroDelUsuario);
+            option = Option.QUIT;
+        }
+        return option;
     }
 
     private void executeSaveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
