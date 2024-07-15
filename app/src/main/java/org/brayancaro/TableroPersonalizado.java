@@ -339,8 +339,6 @@ public class TableroPersonalizado extends Tablero {
      * @param cordenadaY -- Hace referencia a la posicion que necesito mover en el eje y
      */
     private void asignarNumeroDeBombasAledañas(int cordenadaX, int cordenadaY) {
-        int filas = celdas.length - 1;
-        int columnas = celdas[0].length - 1;
         boolean xEsValidoArriba = (cordenadaX + 1) < celdas.length;
         boolean xEsValidoAbajo = (cordenadaX - 1) >= 0;
         boolean yEsValidoIzquierda = 0 <= (cordenadaY - 1);
