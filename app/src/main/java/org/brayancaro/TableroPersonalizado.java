@@ -141,9 +141,9 @@ public class TableroPersonalizado extends Tablero {
     }
 
     /**
-     * Uses BFS to visit hidden cells without bombs.
+     * Uses DFS to visit hidden cells without bombs.
      *
-     * This method performs a breadth-first search (BFS) to reveal all connected cells
+     * This method performs a depth-first search (DFS) to reveal all connected cells
      * that do not contain bombs. At the end of the search, only cells that are
      * neighbors of a bomb-containing cell will also be revealed.
      *
