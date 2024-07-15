@@ -65,7 +65,7 @@ public class TableroPersonalizado extends Tablero {
                 !celdas[numeroAleratorioFilas][numeroAleratorioColumnas].obtenerEstaCeldaTieneUnaBomba()
             ) {
                 celdas[numeroAleratorioFilas][numeroAleratorioColumnas].ponerBomba();
-                asignarNumeroDeBombasAledañas(
+                setupBombCount(
                     numeroAleratorioFilas,
                     numeroAleratorioColumnas
                 );
@@ -338,7 +338,7 @@ public class TableroPersonalizado extends Tablero {
      * @param cordenadaX -- Hace referencia a la posicion que queremos mover en el eje x
      * @param cordenadaY -- Hace referencia a la posicion que necesito mover en el eje y
      */
-    private void asignarNumeroDeBombasAledañas(int cordenadaX, int cordenadaY) {
+    private void setupBombCount(int cordenadaX, int cordenadaY) {
         boolean xEsValidoArriba = (cordenadaX + 1) < celdas.length;
         boolean xEsValidoAbajo = (cordenadaX - 1) >= 0;
         boolean yEsValidoIzquierda = 0 <= (cordenadaY - 1);
