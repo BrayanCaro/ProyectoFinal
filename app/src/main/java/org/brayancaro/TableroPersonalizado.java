@@ -7,6 +7,8 @@
  */
 package org.brayancaro;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.brayancaro.enums.cell.State;
@@ -15,6 +17,10 @@ import org.brayancaro.records.Coordinate;
 public class TableroPersonalizado extends Tablero {
 
     private static final long serialVersionUID = 42l;
+
+    protected int rows;
+
+    protected int columns;
 
     /**
      * Constructor de un tablero con celdas a partir de un numero de bombas a poner
@@ -28,6 +34,8 @@ public class TableroPersonalizado extends Tablero {
         int numeroDeBombasParaPoner,
         Random random
     ) throws IllegalArgumentException {
+        rows = filas;
+        columns = columnas;
 
         random(random);
 
@@ -146,8 +154,6 @@ public class TableroPersonalizado extends Tablero {
         int cordenadaY
     ) {
         celdas[cordenadaX][cordenadaY].verCelda();
-        int filas = celdas.length - 1;
-        int columnas = celdas[0].length - 1;
         boolean xEsValidoArriba = (cordenadaX + 1) < celdas.length;
         boolean xEsValidoAbajo = (cordenadaX - 1) >= 0;
         boolean yEsValidoIzquierda = 0 <= (cordenadaY - 1);
@@ -506,5 +512,23 @@ public class TableroPersonalizado extends Tablero {
             case MARKED  -> marcarCelda(coordinate);
             case REVEALED -> elegirCelda(coordinate);
         }
+    }
+
+    public List<Coordinate> neighbours(Coordinate coordinate) {
+        int x = coordinate.x();
+        int y = coordinate.y();
+
+        var coordinates = new ArrayList<Coordinate>();
+
+        for (int i = Math.max(0, x - 1); i <= Math.min(rows - 1, x + 1); i++) {
+            for (int j = Math.max(0, y - 1); j <= Math.min(columns - 1, y + 1); j++) {
+                if (i == x && j == y) {
+                    continue;
+                }
+                coordinates.add(new Coordinate(i, j));
+            }
+        }
+
+        return coordinates;
     }
 }
