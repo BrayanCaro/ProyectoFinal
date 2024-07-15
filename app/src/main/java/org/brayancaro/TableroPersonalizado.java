@@ -105,6 +105,8 @@ public class TableroPersonalizado extends Tablero {
             );
         }
 
+        var coordinate = new Coordinate(cordenadaX, cordenadaY);
+
         celdas[cordenadaX][cordenadaY].verCelda();
 
         if (!celdas[cordenadaX][cordenadaY].obtenerEstaCeldaTieneUnaBomba()) {
@@ -112,11 +114,7 @@ public class TableroPersonalizado extends Tablero {
                 celdas[cordenadaX][cordenadaY].obtenerBombasAlRededorDeEstaCelda() ==
                 0
             ) {
-                buscarTodosLosCerosEncerrados(
-                    this.celdas,
-                    cordenadaX,
-                    cordenadaY
-                );
+                visitCellsWihoutBombs(coordinate);
             }
         } else {
             celdas[cordenadaX][cordenadaY].explotar();
@@ -142,193 +140,29 @@ public class TableroPersonalizado extends Tablero {
         }
     }
 
-    /*
-     * Metodo para calcular todos las casillas que tengan un 0
-     * @param cordenadaX -- Hace referencia a la posicion que queremos mover en el eje x
-     * @param cordenadaY -- Hace referencia a la posicion que necesito mover en el eje y
+    /**
+     * Uses BFS to visit hidden cells without bombs.
+     *
+     * This method performs a breadth-first search (BFS) to reveal all connected cells
+     * that do not contain bombs. At the end of the search, only cells that are
+     * neighbors of a bomb-containing cell will also be revealed.
+     *
+     * @param coordinate the starting coordinate from which to begin the search
      */
-    private static void buscarTodosLosCerosEncerrados(
-        Celdas[][] celdas,
-        int cordenadaX,
-        int cordenadaY
-    ) {
-        celdas[cordenadaX][cordenadaY].verCelda();
-        boolean xEsValidoArriba = (cordenadaX + 1) < celdas.length;
-        boolean xEsValidoAbajo = (cordenadaX - 1) >= 0;
-        boolean yEsValidoIzquierda = 0 <= (cordenadaY - 1);
-        boolean yEsValidoDerecha = (cordenadaY + 1) < celdas[0].length;
-        boolean xyEsValidoArribaIzquierda =
-            xEsValidoArriba && yEsValidoIzquierda;
-        boolean xyEsValidoArribaDerecha = xEsValidoArriba && yEsValidoDerecha;
-        boolean xyEsValidoAbajoIzquierda = xEsValidoAbajo && yEsValidoIzquierda;
-        boolean xyEsValidoAbajoDerecha = xEsValidoAbajo && yEsValidoDerecha;
+    private void visitCellsWihoutBombs(Coordinate coordinate) {
+        celdas[coordinate.x()][coordinate.y()].verCelda();
 
-        if (
-            xEsValidoArriba &&
-            !celdas[cordenadaX + 1][cordenadaY].haSidoVista() &&
-            celdas[cordenadaX +
-                1][cordenadaY].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(celdas, cordenadaX + 1, cordenadaY);
-        }
-        if (
-            xEsValidoArriba &&
-            !celdas[cordenadaX + 1][cordenadaY].haSidoVista() &&
-            celdas[cordenadaX +
-                1][cordenadaY].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX + 1][cordenadaY].verCelda();
-        }
+        var neighbours = neighbours(coordinate);
 
-        if (
-            xEsValidoAbajo &&
-            !celdas[cordenadaX - 1][cordenadaY].haSidoVista() &&
-            celdas[cordenadaX -
-                1][cordenadaY].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(celdas, cordenadaX - 1, cordenadaY);
-        }
-        if (
-            xEsValidoAbajo &&
-            !celdas[cordenadaX - 1][cordenadaY].haSidoVista() &&
-            celdas[cordenadaX -
-                1][cordenadaY].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX - 1][cordenadaY].verCelda();
-        }
+        neighbours.removeIf((Coordinate coord)  ->  celdas[coord.x()][coord.y()].haSidoVista());
 
-        if (
-            yEsValidoIzquierda &&
-            !celdas[cordenadaX][cordenadaY - 1].haSidoVista() &&
-            celdas[cordenadaX][cordenadaY -
-                    1].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(celdas, cordenadaX, cordenadaY - 1);
-        }
-        if (
-            yEsValidoIzquierda &&
-            !celdas[cordenadaX][cordenadaY - 1].haSidoVista() &&
-            celdas[cordenadaX][cordenadaY -
-                    1].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX][cordenadaY - 1].verCelda();
-        }
-
-        if (
-            yEsValidoDerecha &&
-            !celdas[cordenadaX][cordenadaY + 1].haSidoVista() &&
-            celdas[cordenadaX][cordenadaY +
-                    1].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(celdas, cordenadaX, cordenadaY + 1);
-        }
-        if (
-            yEsValidoDerecha &&
-            !celdas[cordenadaX][cordenadaY + 1].haSidoVista() &&
-            celdas[cordenadaX][cordenadaY +
-                    1].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX][cordenadaY + 1].verCelda();
-        }
-
-        if (
-            xyEsValidoArribaIzquierda &&
-            !celdas[cordenadaX + 1][cordenadaY - 1].haSidoVista() &&
-            celdas[cordenadaX + 1][cordenadaY -
-                    1].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(
-                celdas,
-                cordenadaX + 1,
-                cordenadaY - 1
-            );
-        }
-        if (
-            xyEsValidoArribaIzquierda &&
-            !celdas[cordenadaX + 1][cordenadaY - 1].haSidoVista() &&
-            celdas[cordenadaX + 1][cordenadaY -
-                    1].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX + 1][cordenadaY - 1].verCelda();
-        }
-
-        if (
-            xyEsValidoArribaDerecha &&
-            !celdas[cordenadaX + 1][cordenadaY + 1].haSidoVista() &&
-            celdas[cordenadaX + 1][cordenadaY +
-                    1].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(
-                celdas,
-                cordenadaX + 1,
-                cordenadaY + 1
-            );
-        }
-        if (
-            xyEsValidoArribaDerecha &&
-            !celdas[cordenadaX + 1][cordenadaY + 1].haSidoVista() &&
-            celdas[cordenadaX + 1][cordenadaY +
-                    1].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX + 1][cordenadaY + 1].verCelda();
-        }
-
-        if (
-            xyEsValidoAbajoIzquierda &&
-            !celdas[cordenadaX - 1][cordenadaY - 1].haSidoVista() &&
-            celdas[cordenadaX - 1][cordenadaY -
-                    1].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(
-                celdas,
-                cordenadaX - 1,
-                cordenadaY - 1
-            );
-        }
-        if (
-            xyEsValidoAbajoIzquierda &&
-            !celdas[cordenadaX - 1][cordenadaY - 1].haSidoVista() &&
-            celdas[cordenadaX - 1][cordenadaY -
-                    1].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX - 1][cordenadaY - 1].verCelda();
-        }
-
-        if (
-            xyEsValidoAbajoDerecha &&
-            !celdas[cordenadaX - 1][cordenadaY + 1].haSidoVista() &&
-            celdas[cordenadaX - 1][cordenadaY +
-                    1].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-        ) {
-            buscarTodosLosCerosEncerrados(
-                celdas,
-                cordenadaX - 1,
-                cordenadaY + 1
-            );
-        }
-        if (
-            xyEsValidoAbajoDerecha &&
-            !celdas[cordenadaX - 1][cordenadaY + 1].haSidoVista() &&
-            celdas[cordenadaX - 1][cordenadaY +
-                    1].obtenerBombasAlRededorDeEstaCelda() !=
-                0
-        ) {
-            celdas[cordenadaX - 1][cordenadaY + 1].verCelda();
+        for (var neighbourCoordinate : neighbours) {
+            Celdas cell = celdas[neighbourCoordinate.x()][neighbourCoordinate.y()];
+            if (cell.obtenerBombasAlRededorDeEstaCelda() == 0) {
+                visitCellsWihoutBombs(neighbourCoordinate);
+            } else {
+                cell.verCelda();
+            }
         }
     }
 
