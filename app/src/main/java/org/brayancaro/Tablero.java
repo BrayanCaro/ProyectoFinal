@@ -7,10 +7,7 @@
 package org.brayancaro;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Random;
-
-import org.brayancaro.records.Coordinate;
 
 public abstract class Tablero implements Serializable {
 
