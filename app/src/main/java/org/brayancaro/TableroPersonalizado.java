@@ -61,14 +61,13 @@ public class TableroPersonalizado extends Tablero {
                 this.celdas[0].length - 1
             );
 
+            var coordinate = new Coordinate(numeroAleratorioFilas, numeroAleratorioColumnas);
+
             if (
                 !celdas[numeroAleratorioFilas][numeroAleratorioColumnas].obtenerEstaCeldaTieneUnaBomba()
             ) {
                 celdas[numeroAleratorioFilas][numeroAleratorioColumnas].ponerBomba();
-                setupBombCount(
-                    numeroAleratorioFilas,
-                    numeroAleratorioColumnas
-                );
+                setupBombCountForNeigbours(coordinate);
             } else {
                 if (i <= (celdas.length + 1) * (celdas[0].length + 1)) {
                     i--;
@@ -333,81 +332,21 @@ public class TableroPersonalizado extends Tablero {
         }
     }
 
-    /*
-     * Metodo para calcular y asignar la candiad de bombas aledañas a una celda
-     * @param cordenadaX -- Hace referencia a la posicion que queremos mover en el eje x
-     * @param cordenadaY -- Hace referencia a la posicion que necesito mover en el eje y
+    /**
+     * Adjusts the bomb count for the neighboring cells.
+     *
+     * This method updates the bomb count for each cell adjacent to the given coordinate.
+     * It is intended to be used during the setup of the board to correctly reflect
+     * the number of bombs surrounding each cell.
+     *
+     * @param coordinate the coordinate of the cell for which to adjust the bomb count
      */
-    private void setupBombCount(int cordenadaX, int cordenadaY) {
-        boolean xEsValidoArriba = (cordenadaX + 1) < celdas.length;
-        boolean xEsValidoAbajo = (cordenadaX - 1) >= 0;
-        boolean yEsValidoIzquierda = 0 <= (cordenadaY - 1);
-        boolean yEsValidoDerecha = (cordenadaY + 1) < celdas[0].length;
-        boolean xyEsValidoArribaIzquierda =
-            xEsValidoArriba && yEsValidoIzquierda;
-        boolean xyEsValidoArribaDerecha = xEsValidoArriba && yEsValidoDerecha;
-        boolean xyEsValidoAbajoIzquierda = xEsValidoAbajo && yEsValidoIzquierda;
-        boolean xyEsValidoAbajoDerecha = xEsValidoAbajo && yEsValidoDerecha;
-
-        if (
-            xEsValidoArriba &&
-            !celdas[cordenadaX + 1][cordenadaY].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX +
-            1][cordenadaY].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xEsValidoAbajo &&
-            !celdas[cordenadaX - 1][cordenadaY].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX -
-            1][cordenadaY].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            yEsValidoIzquierda &&
-            !celdas[cordenadaX][cordenadaY - 1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX][cordenadaY -
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            yEsValidoDerecha &&
-            !celdas[cordenadaX][cordenadaY + 1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX][cordenadaY +
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoArribaIzquierda &&
-            !celdas[cordenadaX + 1][cordenadaY -
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX + 1][cordenadaY -
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoArribaDerecha &&
-            !celdas[cordenadaX + 1][cordenadaY +
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX + 1][cordenadaY +
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoAbajoIzquierda &&
-            !celdas[cordenadaX - 1][cordenadaY -
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX - 1][cordenadaY -
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoAbajoDerecha &&
-            !celdas[cordenadaX - 1][cordenadaY +
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX - 1][cordenadaY +
-                1].aumentarBombasAlRededorDeEstaCelda();
+    private void setupBombCountForNeigbours(Coordinate coordinate) {
+        for (var neighbourCoordinate : neighbours(coordinate)) {
+            Celdas cell = celdas[neighbourCoordinate.x()][neighbourCoordinate.y()];
+            if (!cell.obtenerEstaCeldaTieneUnaBomba()) {
+                cell.aumentarBombasAlRededorDeEstaCelda();
+            }
         }
     }
 
