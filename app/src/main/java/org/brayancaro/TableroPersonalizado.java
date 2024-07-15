@@ -7,6 +7,8 @@
  */
 package org.brayancaro;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.brayancaro.enums.cell.State;
@@ -15,6 +17,10 @@ import org.brayancaro.records.Coordinate;
 public class TableroPersonalizado extends Tablero {
 
     private static final long serialVersionUID = 42l;
+
+    protected int rows;
+
+    protected int columns;
 
     /**
      * Constructor de un tablero con celdas a partir de un numero de bombas a poner
@@ -28,6 +34,8 @@ public class TableroPersonalizado extends Tablero {
         int numeroDeBombasParaPoner,
         Random random
     ) throws IllegalArgumentException {
+        rows = filas;
+        columns = columnas;
 
         random(random);
 
@@ -53,14 +61,13 @@ public class TableroPersonalizado extends Tablero {
                 this.celdas[0].length - 1
             );
 
+            var coordinate = new Coordinate(numeroAleratorioFilas, numeroAleratorioColumnas);
+
             if (
                 !celdas[numeroAleratorioFilas][numeroAleratorioColumnas].obtenerEstaCeldaTieneUnaBomba()
             ) {
                 celdas[numeroAleratorioFilas][numeroAleratorioColumnas].ponerBomba();
-                asignarNumeroDeBombasAledañas(
-                    numeroAleratorioFilas,
-                    numeroAleratorioColumnas
-                );
+                setupBombCountForNeigbours(coordinate);
             } else {
                 if (i <= (celdas.length + 1) * (celdas[0].length + 1)) {
                     i--;
@@ -146,8 +153,6 @@ public class TableroPersonalizado extends Tablero {
         int cordenadaY
     ) {
         celdas[cordenadaX][cordenadaY].verCelda();
-        int filas = celdas.length - 1;
-        int columnas = celdas[0].length - 1;
         boolean xEsValidoArriba = (cordenadaX + 1) < celdas.length;
         boolean xEsValidoAbajo = (cordenadaX - 1) >= 0;
         boolean yEsValidoIzquierda = 0 <= (cordenadaY - 1);
@@ -327,83 +332,21 @@ public class TableroPersonalizado extends Tablero {
         }
     }
 
-    /*
-     * Metodo para calcular y asignar la candiad de bombas aledañas a una celda
-     * @param cordenadaX -- Hace referencia a la posicion que queremos mover en el eje x
-     * @param cordenadaY -- Hace referencia a la posicion que necesito mover en el eje y
+    /**
+     * Adjusts the bomb count for the neighboring cells.
+     *
+     * This method updates the bomb count for each cell adjacent to the given coordinate.
+     * It is intended to be used during the setup of the board to correctly reflect
+     * the number of bombs surrounding each cell.
+     *
+     * @param coordinate the coordinate of the cell for which to adjust the bomb count
      */
-    private void asignarNumeroDeBombasAledañas(int cordenadaX, int cordenadaY) {
-        int filas = celdas.length - 1;
-        int columnas = celdas[0].length - 1;
-        boolean xEsValidoArriba = (cordenadaX + 1) < celdas.length;
-        boolean xEsValidoAbajo = (cordenadaX - 1) >= 0;
-        boolean yEsValidoIzquierda = 0 <= (cordenadaY - 1);
-        boolean yEsValidoDerecha = (cordenadaY + 1) < celdas[0].length;
-        boolean xyEsValidoArribaIzquierda =
-            xEsValidoArriba && yEsValidoIzquierda;
-        boolean xyEsValidoArribaDerecha = xEsValidoArriba && yEsValidoDerecha;
-        boolean xyEsValidoAbajoIzquierda = xEsValidoAbajo && yEsValidoIzquierda;
-        boolean xyEsValidoAbajoDerecha = xEsValidoAbajo && yEsValidoDerecha;
-
-        if (
-            xEsValidoArriba &&
-            !celdas[cordenadaX + 1][cordenadaY].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX +
-            1][cordenadaY].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xEsValidoAbajo &&
-            !celdas[cordenadaX - 1][cordenadaY].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX -
-            1][cordenadaY].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            yEsValidoIzquierda &&
-            !celdas[cordenadaX][cordenadaY - 1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX][cordenadaY -
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            yEsValidoDerecha &&
-            !celdas[cordenadaX][cordenadaY + 1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX][cordenadaY +
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoArribaIzquierda &&
-            !celdas[cordenadaX + 1][cordenadaY -
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX + 1][cordenadaY -
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoArribaDerecha &&
-            !celdas[cordenadaX + 1][cordenadaY +
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX + 1][cordenadaY +
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoAbajoIzquierda &&
-            !celdas[cordenadaX - 1][cordenadaY -
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX - 1][cordenadaY -
-                1].aumentarBombasAlRededorDeEstaCelda();
-        }
-        if (
-            xyEsValidoAbajoDerecha &&
-            !celdas[cordenadaX - 1][cordenadaY +
-                1].obtenerEstaCeldaTieneUnaBomba()
-        ) {
-            celdas[cordenadaX - 1][cordenadaY +
-                1].aumentarBombasAlRededorDeEstaCelda();
+    private void setupBombCountForNeigbours(Coordinate coordinate) {
+        for (var neighbourCoordinate : neighbours(coordinate)) {
+            Celdas cell = celdas[neighbourCoordinate.x()][neighbourCoordinate.y()];
+            if (!cell.obtenerEstaCeldaTieneUnaBomba()) {
+                cell.aumentarBombasAlRededorDeEstaCelda();
+            }
         }
     }
 
@@ -506,5 +449,23 @@ public class TableroPersonalizado extends Tablero {
             case MARKED  -> marcarCelda(coordinate);
             case REVEALED -> elegirCelda(coordinate);
         }
+    }
+
+    public List<Coordinate> neighbours(Coordinate coordinate) {
+        int x = coordinate.x();
+        int y = coordinate.y();
+
+        var coordinates = new ArrayList<Coordinate>();
+
+        for (int i = Math.max(0, x - 1); i <= Math.min(rows - 1, x + 1); i++) {
+            for (int j = Math.max(0, y - 1); j <= Math.min(columns - 1, y + 1); j++) {
+                if (i == x && j == y) {
+                    continue;
+                }
+                coordinates.add(new Coordinate(i, j));
+            }
+        }
+
+        return coordinates;
     }
 }
