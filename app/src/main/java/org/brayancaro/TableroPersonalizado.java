@@ -7,6 +7,7 @@
  */
 package org.brayancaro;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +23,10 @@ public class TableroPersonalizado extends Tablero {
 
     protected int columns;
 
+    protected ZonedDateTime startedAt;
+
+    protected ZonedDateTime endedAt;
+
     /**
      * Constructor de un tablero con celdas a partir de un numero de bombas a poner
      * @param filas - Indica la cantidad de filas del tablero
@@ -36,6 +41,8 @@ public class TableroPersonalizado extends Tablero {
     ) throws IllegalArgumentException {
         rows = filas;
         columns = columnas;
+
+        startedAt = ZonedDateTime.now();
 
         random(random);
 
@@ -117,6 +124,7 @@ public class TableroPersonalizado extends Tablero {
                 visitCellsWihoutBombs(coordinate);
             }
         } else {
+            endGame();
             celdas[cordenadaX][cordenadaY].explotar();
             throw new TocasteUnaBombaExcepcion("Perdiste :(");
         }
@@ -253,6 +261,7 @@ public class TableroPersonalizado extends Tablero {
      * Metodo que modifica el mapa para cuando el usuario gana
      */
     public void ganador() {
+        endGame();
         for (int i = 0; i < celdas.length; i++) {
             for (int j = 0; j < celdas[0].length; j++) {
                 if (celdas[i][j].obtenerEstaCeldaTieneUnaBomba()) {
@@ -302,4 +311,13 @@ public class TableroPersonalizado extends Tablero {
 
         return coordinates;
     }
+
+    public ZonedDateTime getEndedAt() {
+        return endedAt;
+    }
+
+    public void endGame() {
+        this.endedAt = ZonedDateTime.now();
+    }
+
 }

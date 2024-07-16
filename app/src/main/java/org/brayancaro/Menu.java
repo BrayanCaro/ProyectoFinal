@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
+import java.time.format.DateTimeFormatter;
 import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
@@ -29,8 +30,6 @@ public class Menu {
     public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
 
     private static String[][] datos = new String[20][4];
-    static MiHilo hola = new MiHilo("hola");
-    static Thread cronometro = new Thread(hola);
 
     protected Scanner scanner;
 
@@ -129,9 +128,6 @@ public class Menu {
         System.out.println(board);
         System.out.println("EMPECEMOS");
         System.out.println("Hay " + bombas + " bombas en el mapa");
-        try {
-            cronometro.start();
-        } catch (Exception e) {}
         do {
             try {
                 executeChangeCellState(bombas, board);
@@ -139,10 +135,6 @@ public class Menu {
                 board.mostrarTodasLasBombas();
                 System.out.println("\033[33m" + board + "\033[0m");
                 System.out.println(board.centrar() + " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n");
-                try {
-                    cronometro.interrupt();
-                } catch (IllegalThreadStateException ee) {}
-
                 break;
             }
             option = handleWinningState(option, bombas, board);
@@ -160,9 +152,6 @@ public class Menu {
                 board.centrar() +
                 " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n"
             );
-            try {
-                cronometro.interrupt();
-            } catch (Exception e) {}
 
             executeSaveGame(bombas, board);
             option = Option.QUIT;
@@ -190,8 +179,7 @@ public class Menu {
         grabar(
                 tableroDelUsuario,
                 username,
-                bombas,
-                hola.tiempo
+                bombas
               );
 
         guardarDatos();
@@ -380,8 +368,7 @@ public class Menu {
     public static void grabar(
         TableroPersonalizado tablero,
         String nombre,
-        int bombas,
-        String tiempo
+        int bombas
     ) {
         if (datos[19][0] != null) {
             throw new IllegalArgumentException("El tablero esta lleno");
@@ -393,7 +380,7 @@ public class Menu {
                 datos[i][0] = nombre;
                 datos[i][1] = tablero.dimension();
                 datos[i][2] = bombas + "";
-                datos[i][3] = tiempo;
+                datos[i][3] = tablero.getEndedAt().format(DateTimeFormatter.RFC_1123_DATE_TIME);
                 aux = true;
             } else {
                 i++;
