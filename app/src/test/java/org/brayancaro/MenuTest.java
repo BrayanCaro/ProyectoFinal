@@ -3,181 +3,319 @@
  */
 package org.brayancaro;
 
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.Terminal;
 
 public class MenuTest {
+    private Menu menu;
+
+    private Terminal terminal;
+
     @Before
-    public void init() {
+    public void init() throws IOException {
         new File(Menu.SAVED_FILE_PATH).delete();
-    }
 
-    @Test
-    public void menuFailsWithInvalidInput() {
-        var classUnderTest = new Menu()
-            .setScanner(new Scanner("foo"));
+        terminal = Mockito.mock(Terminal.class);
 
-        assertThrows(
-            Exception.class,
-                () -> classUnderTest.play()
-        );
+        Mockito.when(terminal.getTerminalSize()).thenReturn(TerminalSize.ONE);
+
+        var screen = new TerminalScreen(terminal);
+        menu = new Menu()
+                .random(new Random(120))
+                .screen(screen);
     }
 
     @Test
     public void playerCanWinAGame() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        1 # start game
-                        8 # rows
-                        8 # columns
-                        1 # bombs
-                        1 1
-                        v
-                        n
-                        4 # exit
-                        """))
-            .play();
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // mock user keys: press first option and then submit
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("""
+                8 # rows
+                8 # columns
+                1 # bombs
+                1 1
+                v
+                n
+                """))
+                .play();
 
         assertTrue(true);
     }
 
     @Test
     public void playerCanWinAndSaveGame() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        1 # start game
-                        8 # rows
-                        8 # columns
-                        1 # bombs
-                        1 1
-                        v
-                        s
-                        name-for-saving-game
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // mock user keys: press first option and then submit
 
-                        2 # see game
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
 
-                        4
-                        """))
-            .play();
+                // view stats
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null,
+
+                // view stats
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null,
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("""
+                1 # start game
+                8 # rows
+                8 # columns
+                1 # bombs
+                1 1
+                v
+                s
+                name-for-saving-game
+
+                2 # see game
+
+                """))
+                .play();
 
         assertTrue(true);
     }
 
     @Test
     public void playerCanQuitGameAfterStarting() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        1 # start game
-                        8 # rows
-                        8 # columns
-                        63 # bombs
-                        1 1
-                        v
-                        4 # exit
-                        """))
-            .play();
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // mock user keys: press first option and then submit
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("""
+                8 # rows
+                8 # columns
+                63 # bombs
+                1 1
+                v
+                """))
+                .play();
 
         assertTrue(true);
     }
 
     @Test
     public void playerCanWinAfterMarkingCell() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        1 # start game
-                        8 # rows
-                        8 # columns
-                        63 # bombs
-                        6 1
-                        m
-                        1 1
-                        v
-                        4 # exit
-                        """))
-            .play();
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // mock user keys: press first option and then submit
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("""
+                8 # rows
+                8 # columns
+                63 # bombs
+                6 1
+                m
+                1 1
+                v
+                """))
+                .play();
 
         assertTrue(true);
     }
 
     @Test
     public void playerCanWinAfterTogglingCell() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        1 # start game
-                        8 # rows
-                        8 # columns
-                        63 # bombs
-                        6 1
-                        m
-                        6 1
-                        m
-                        1 1
-                        v
-                        4 # exit
-                        """))
-            .play();
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // mock user keys: press first option and then submit
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("""
+                8 # rows
+                8 # columns
+                63 # bombs
+                6 1
+                m
+                6 1
+                m
+                1 1
+                v
+                """))
+                .play();
 
         assertTrue(true);
     }
 
     @Test
     public void playerCanEraseData() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        1 # start game
-                        8 # rows
-                        8 # columns
-                        1 # bombs
-                        1 1
-                        v
-                        s
-                        name-for-saving-game
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // mock user keys: press first option and then submit
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
 
-                        2 # see game
+                // erase data
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null,
 
-                        3
-                        4
-                        """))
-            .play();
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("""
+                8 # rows
+                8 # columns
+                1 # bombs
+                1 1
+                v
+                s
+                name-for-saving-game
+
+                2 # see game
+
+                3
+                """))
+                .play();
 
         assertTrue(true);
     }
 
     @Test
     public void playerCannotEraseMissingFile() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        3
-                        4
-                        """))
-            .play();
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // erase data
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null,
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("")).play();
 
         assertTrue(true);
     }
 
     @Test
     public void playerCannotSeeMissingFile() throws Exception {
-        new Menu()
-            .random(new Random(120))
-            .setScanner(new Scanner("""
-                        2
-                        4
-                        """))
-            .play();
+        Mockito.when(terminal.pollInput()).thenReturn(
+                // view stats
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null,
+
+                // exit game
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        );
+
+        menu.setScanner(new Scanner("""
+                    """)).play();
 
         assertTrue(true);
     }
