@@ -20,6 +20,7 @@ repositories {
 dependencies {
     // Use JUnit test framework.
     testImplementation(libs.junit)
+    testImplementation(libs.mockito)
 
     // This dependency is used by the application.
     implementation(libs.guava)
