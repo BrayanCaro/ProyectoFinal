@@ -21,10 +21,15 @@ import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.enums.cell.State;
-import org.brayancaro.exceptions.menu.InvalidOptionException;
+import org.brayancaro.gui.windows.AskOptionWindow;
 import org.brayancaro.prompts.Prompt;
 import org.brayancaro.prompts.PromptInt;
 import org.brayancaro.records.Coordinate;
+
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
 public class Menu {
     public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
@@ -35,31 +40,38 @@ public class Menu {
 
     protected Random random;
 
+    private Screen screen;
+
+    private MultiWindowTextGUI gui;
+
     public static void main(String[] args) throws Exception {
-        try (var scanner = new Scanner(System.in)) {
-            new Menu()
-                .setScanner(scanner)
-                .random(new SecureRandom())
-                .play();
+        var defaultTerminalFactory = new DefaultTerminalFactory();
+
+        try (var terminal = defaultTerminalFactory.createTerminal();
+                var screen = new TerminalScreen(terminal);
+                var scanner = new Scanner(System.in)) {
+            (new Menu())
+                    .setScanner(scanner)
+                    .random(new SecureRandom())
+                    .screen(screen)
+                    .play();
         }
+
     }
 
     public void play() throws Exception {
-        Option option = null;
+        screen.startScreen();
 
+        Option option = null;
         do {
             option = askOption();
             realizarAccion(option);
         } while (option != Option.QUIT);
+
+        screen.stopScreen();
     }
 
-    public Menu setScanner(Scanner scanner) {
-        this.scanner = scanner;
-
-        return this;
-    }
-
-    /**
+    /*
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
      */
     public void realizarAccion(Option option) throws Exception {
@@ -75,10 +87,9 @@ public class Menu {
                     }
                 } catch (FileNotFoundException e) {
                     System.out.println(
-                        """
-                        ¡Ups!, parece que no has jugado una partida.
-                        Pero si ya jugaste asegurate de que el archivo "listaDeTablas.minas" esta en la misma carpeta."""
-                    );
+                            """
+                                    ¡Ups!, parece que no has jugado una partida.
+                                    Pero si ya jugaste asegurate de que el archivo "listaDeTablas.minas" esta en la misma carpeta.""");
                 }
             }
             case Option.DELETE_HISTORY -> {
@@ -95,35 +106,34 @@ public class Menu {
 
     private void startGame(Option option) throws Exception, IOException {
         var filas = new PromptInt()
-            .min(8)
-            .max(29)
-            .scanner(scanner)
-            .title("¿Con cuantas filas? ")
-            .printTitleUsing(System.out::print)
-            .ask();
+                .min(8)
+                .max(29)
+                .scanner(scanner)
+                .title("¿Con cuantas filas? ")
+                .printTitleUsing(System.out::print)
+                .ask();
 
         var columnas = new PromptInt()
-            .min(8)
-            .max(29)
-            .scanner(scanner)
-            .title("¿Con cuantas columnas? ")
-            .printTitleUsing(System.out::print)
-            .ask();
+                .min(8)
+                .max(29)
+                .scanner(scanner)
+                .title("¿Con cuantas columnas? ")
+                .printTitleUsing(System.out::print)
+                .ask();
 
         var bombas = new PromptInt()
-            .min(1)
-            .max((filas * columnas) - 1)
-            .scanner(scanner)
-            .title("¿Con cuantas bombas? ")
-            .printTitleUsing(System.out::print)
-            .ask();
+                .min(1)
+                .max((filas * columnas) - 1)
+                .scanner(scanner)
+                .title("¿Con cuantas bombas? ")
+                .printTitleUsing(System.out::print)
+                .ask();
 
         var board = new TableroPersonalizado(
                 filas,
                 columnas,
                 bombas,
-                random
-        );
+                random);
 
         System.out.println(board);
         System.out.println("EMPECEMOS");
@@ -138,10 +148,8 @@ public class Menu {
                 break;
             }
             option = handleWinningState(option, bombas, board);
-        } while (
-            board.jugadorGanoSinMarcas() != bombas &&
-            option != Option.QUIT
-        );
+        } while (board.jugadorGanoSinMarcas() != bombas &&
+                option != Option.QUIT);
     }
 
     private Option handleWinningState(Option option, Integer bombas, TableroPersonalizado board) throws IOException {
@@ -149,9 +157,8 @@ public class Menu {
             board.ganador();
             System.out.println("\n" + board);
             System.out.println(
-                board.centrar() +
-                " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n"
-            );
+                    board.centrar() +
+                            " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n");
 
             executeSaveGame(bombas, board);
             option = Option.QUIT;
@@ -169,22 +176,21 @@ public class Menu {
 
     private void saveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
         var username = new Prompt()
-            .scanner(scanner)
-            .title("¿Cual es tu nombre? ")
-            .printTitleUsing(System.out::print)
-            .ask()
-            .toLowerCase()
-            .trim();
+                .scanner(scanner)
+                .title("¿Cual es tu nombre? ")
+                .printTitleUsing(System.out::print)
+                .ask()
+                .toLowerCase()
+                .trim();
 
         grabar(
                 tableroDelUsuario,
                 username,
-                bombas
-              );
+                bombas);
 
         guardarDatos();
 
-        System.out.println( "¡Listo!, tu partida se ha guardado");
+        System.out.println("¡Listo!, tu partida se ha guardado");
         System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
 
         scanner.nextLine();
@@ -223,27 +229,27 @@ public class Menu {
         Pattern pattern = Pattern.compile("\\s*[sn]\\s*", Pattern.CASE_INSENSITIVE);
 
         return new Prompt()
-            .pattern(pattern)
-            .scanner(scanner)
-            .title("¿Quieres guardar tu partida? (s/n) ")
-            .printTitleUsing(System.out::print)
-            .ask()
-            .toLowerCase()
-            .contains("s");
+                .pattern(pattern)
+                .scanner(scanner)
+                .title("¿Quieres guardar tu partida? (s/n) ")
+                .printTitleUsing(System.out::print)
+                .ask()
+                .toLowerCase()
+                .contains("s");
     }
 
     private State askShouldReveal() {
         Pattern pattern = Pattern.compile("\\s*[mv]\\s*", Pattern.CASE_INSENSITIVE);
 
         var isRevealed = new Prompt()
-            .pattern(pattern)
-            .scanner(scanner)
-            .title( "¿Quieres marcar o ver esa celda? (m/v) ")
-            .printTitleUsing(System.out::print)
-            .ask()
-            .trim()
-            .toLowerCase()
-            .contains("v");
+                .pattern(pattern)
+                .scanner(scanner)
+                .title("¿Quieres marcar o ver esa celda? (m/v) ")
+                .printTitleUsing(System.out::print)
+                .ask()
+                .trim()
+                .toLowerCase()
+                .contains("v");
 
         return isRevealed ? State.REVEALED : State.MARKED;
     }
@@ -252,43 +258,45 @@ public class Menu {
         Pattern pattern = Pattern.compile(Coordinate.PATTERN);
 
         var value = new Prompt()
-            .pattern(pattern)
-            .scanner(scanner)
-            .title("Introduce la cordenada > ")
-            .printTitleUsing(System.out::print)
-            .ask();
+                .pattern(pattern)
+                .scanner(scanner)
+                .title("Introduce la cordenada > ")
+                .printTitleUsing(System.out::print)
+                .ask();
 
         return Coordinate.parse(value);
     }
 
-    protected Option askOption() throws InvalidOptionException {
-        return Option.fromIndex(new PromptInt()
-            .min(1)
-            .max(4)
-            .scanner(scanner)
-            .title(Option.getPrintOptionsText())
-            .ask());
+    protected Option askOption() {
+        AskOptionWindow optionWindow = new AskOptionWindow();
+        gui.addWindowAndWait(optionWindow);
+        return optionWindow.getOptionSelected();
     }
 
     /**
      * Metodo para guardar una partida
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que centendra la partida
+     *
+     * @param nombreDelArchivo -- Refiere al nombre del archivo que centendra la
+     *                         partida
      * @throws FileNotFoundException -- Si el archio no es encontrado
-     * @throws RuntimeException -- Si el archivo no puede ser leido, o si el archivo no puede ser escrito
+     * @throws RuntimeException      -- Si el archivo no puede ser leido, o si el
+     *                               archivo no puede ser escrito
      */
     public static void guardarDatos() throws IOException {
         try (var guardarTabla = new ObjectOutputStream(
-            new FileOutputStream(SAVED_FILE_PATH)
-        )) {
+                new FileOutputStream(SAVED_FILE_PATH))) {
             guardarTabla.writeObject(Menu.datos);
         }
     }
 
     /**
      * Metodo para guardar una partida
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que centendra la partida
+     *
+     * @param nombreDelArchivo -- Refiere al nombre del archivo que centendra la
+     *                         partida
      * @throws FileNotFoundException -- Si el archio no es encontrado
-     * @throws RuntimeException -- Si el archivo no puede ser leido, o si el archivo no puede ser escrito
+     * @throws RuntimeException      -- Si el archivo no puede ser leido, o si el
+     *                               archivo no puede ser escrito
      */
     public static void borrarDatos() throws IOException, NullPointerException {
         if (datos[0][0] == null) {
@@ -305,20 +313,20 @@ public class Menu {
         }
 
         try (var guardarTabla = new ObjectOutputStream(
-            new FileOutputStream(SAVED_FILE_PATH)
-        )) {
+                new FileOutputStream(SAVED_FILE_PATH))) {
             guardarTabla.writeObject(listaVacia);
         }
     }
 
     /**
      * Metodo para cargar una partida de un archivo
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que contiene las partidas
+     *
+     * @param nombreDelArchivo -- Refiere al nombre del archivo que contiene las
+     *                         partidas
      */
     public static String[][] cargarDatosDeUnArchivo() throws IOException, ClassNotFoundException {
         try (var stream = new ObjectInputStream(
-            new FileInputStream(SAVED_FILE_PATH)
-        )) {
+                new FileInputStream(SAVED_FILE_PATH))) {
             Menu.datos = (String[][]) stream.readObject();
             return Menu.datos;
         }
@@ -326,6 +334,7 @@ public class Menu {
 
     /**
      * Metodo que imprime el menu
+     *
      * @param arreglo -- Indica el arreglo de arreglos de Strings que va a imprimir
      */
     public static void tabla(String[][] arreglo) {
@@ -347,16 +356,15 @@ public class Menu {
         for (int i = 0; i < arreglo.length; i++) {
             if (arreglo[i][0] != null) {
                 System.out.print(
-                    "| " +
-                    arreglo[i][0].concat("      ").substring(0, 6) +
-                    " |   " +
-                    arreglo[i][1].concat("   ").substring(0, 6) +
-                    "  |    " +
-                    arreglo[i][2].concat("  ").substring(0, 3) +
-                    "    | " +
-                    arreglo[i][3] +
-                    " |\n"
-                );
+                        "| " +
+                                arreglo[i][0].concat("      ").substring(0, 6) +
+                                " |   " +
+                                arreglo[i][1].concat("   ").substring(0, 6) +
+                                "  |    " +
+                                arreglo[i][2].concat("  ").substring(0, 3) +
+                                "    | " +
+                                arreglo[i][3] +
+                                " |\n");
             }
         }
         for (int i = 0; i < 45; i++) {
@@ -366,10 +374,9 @@ public class Menu {
     }
 
     public static void grabar(
-        TableroPersonalizado tablero,
-        String nombre,
-        int bombas
-    ) {
+            TableroPersonalizado tablero,
+            String nombre,
+            int bombas) {
         if (datos[19][0] != null) {
             throw new IllegalArgumentException("El tablero esta lleno");
         }
@@ -390,6 +397,19 @@ public class Menu {
 
     public Menu random(Random random) {
         this.random = random;
+
+        return this;
+    }
+
+    public Menu screen(Screen screen) {
+        this.screen = screen;
+        this.gui = new MultiWindowTextGUI(screen);
+
+        return this;
+    }
+
+    public Menu setScanner(Scanner scanner) {
+        this.scanner = scanner;
 
         return this;
     }
