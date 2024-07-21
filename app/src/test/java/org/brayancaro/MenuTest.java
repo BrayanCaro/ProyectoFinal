@@ -3,15 +3,15 @@
  */
 package org.brayancaro;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.googlecode.lanterna.TerminalSize;
@@ -20,12 +20,12 @@ import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.Terminal;
 
-public class MenuTest {
+class MenuTest {
     private Menu menu;
 
     private Terminal terminal;
 
-    @Before
+    @BeforeEach
     public void init() throws IOException {
         new File(Menu.SAVED_FILE_PATH).delete();
 
@@ -40,7 +40,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCanWinAGame() throws Exception {
+    void playerCanWinAGame() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
                 new KeyStroke(KeyType.Enter),
@@ -72,7 +72,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCanWinAndSaveGame() throws Exception {
+    void playerCanWinAndSaveGame() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
 
@@ -124,7 +124,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCanQuitGameAfterStarting() throws Exception {
+    void playerCanQuitGameAfterStarting() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
                 new KeyStroke(KeyType.Enter),
@@ -155,7 +155,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCanWinAfterMarkingCell() throws Exception {
+    void playerCanWinAfterMarkingCell() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
                 new KeyStroke(KeyType.Enter),
@@ -188,7 +188,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCanWinAfterTogglingCell() throws Exception {
+    void playerCanWinAfterTogglingCell() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
                 new KeyStroke(KeyType.Enter),
@@ -223,7 +223,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCanEraseData() throws Exception {
+    void playerCanEraseData() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
                 new KeyStroke(KeyType.Enter),
@@ -269,7 +269,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCannotEraseMissingFile() throws Exception {
+    void playerCannotEraseMissingFile() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // erase data
                 new KeyStroke(KeyType.ArrowDown), // focus 2nd option
@@ -295,7 +295,7 @@ public class MenuTest {
     }
 
     @Test
-    public void playerCannotSeeMissingFile() throws Exception {
+    void playerCannotSeeMissingFile() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // view stats
                 new KeyStroke(KeyType.ArrowDown), // focus 2nd option

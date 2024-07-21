@@ -1,22 +1,19 @@
 package org.brayancaro;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 
 import org.brayancaro.records.Coordinate;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-/**
- * BoardTest
- */
-public class BoardTest {
+class BoardTest {
     protected TableroPersonalizado board;
 
-    @Before
+    @BeforeEach
     public void init() {
         int rows = 5;
         int colums = 6;
@@ -25,7 +22,7 @@ public class BoardTest {
     }
 
     @Test
-    public void neighboursListIsValidForSimpleCase() {
+    void neighboursListIsValidForSimpleCase() {
         var expected = Arrays.asList(
                 new Coordinate(1, 1),
                 new Coordinate(1, 2),
@@ -38,11 +35,11 @@ public class BoardTest {
         );
         var current = board.neighbours(new Coordinate(2, 2));
 
-        assertEquals("Coordinate neighbours is wrong", new HashSet<>(expected), new HashSet<>(current));
+        assertEquals(new HashSet<>(expected), new HashSet<>(current), "Coordinate neighbours is wrong");
     }
 
     @Test
-    public void neighbourListIsValidEvenNearbyBorders() {
+    void neighbourListIsValidEvenNearbyBorders() {
         var expected = Arrays.asList(
                 new Coordinate(0, 1),
                 new Coordinate(1, 0),
@@ -50,11 +47,11 @@ public class BoardTest {
         );
         var current = board.neighbours(new Coordinate(0, 0));
 
-        assertEquals("Coordinate neighbours is wrong", new HashSet<>(expected), new HashSet<>(current));
+        assertEquals(new HashSet<>(expected), new HashSet<>(current), "Coordinate neighbours is wrong");
     }
 
     @Test
-    public void neighbourListIsValidEvenNearbyBordersLimitBoard() {
+    void neighbourListIsValidEvenNearbyBordersLimitBoard() {
         var expected = Arrays.asList(
                 new Coordinate(4, 4),
                 new Coordinate(3, 4),
@@ -62,6 +59,6 @@ public class BoardTest {
         );
         var current = board.neighbours(new Coordinate(4, 5));
 
-        assertEquals("Coordinate neighbours is wrong", new HashSet<>(expected), new HashSet<>(current));
+        assertEquals(new HashSet<>(expected), new HashSet<>(current), "Coordinate neighbours is wrong");
     }
 }

@@ -3,16 +3,18 @@
 
 [versions]
 guava = "33.0.0-jre"
-junit = "4.13.2"
+junit = "5.10.3"
 sonarqube = "4.4.1.3373"
 lanterna = "3.1.2"
 mockito = "4.0.0"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
-junit = { module = "junit:junit", version.ref = "junit" }
+junit = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 lanterna = { module = "com.googlecode.lanterna:lanterna", version.ref = "lanterna" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
 
 [plugins]
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
