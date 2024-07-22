@@ -1,29 +1,30 @@
 package org.brayancaro.records;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CoordinateTest {
+
+class CoordinateTest {
     @Test
-    public void createsValidRecord() {
+    void createsValidRecord() {
         var coordinate = Coordinate.parse("1 2");
 
-        assertEquals(coordinate.x(), 0);
-        assertEquals(coordinate.y(), 1);
+        assertEquals(0, coordinate.x());
+        assertEquals(1, coordinate.y());
     }
 
     @Test
-    public void createsValidRecordWithLowerBond() {
+    void createsValidRecordWithLowerBond() {
         var coordinate = Coordinate.parse("0 0");
 
-        assertEquals(coordinate.x(), 0);
-        assertEquals(coordinate.y(), 0);
+        assertEquals(0, coordinate.x());
+        assertEquals(0, coordinate.y());
     }
 
     @Test
-    public void givenNegativeValues_createsValidRecord() {
+    void givenNegativeValues_createsValidRecord() {
         assertThrows(IllegalStateException.class, () -> {
             Coordinate.parse("-1 -1");
         });

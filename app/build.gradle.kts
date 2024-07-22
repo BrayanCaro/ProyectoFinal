@@ -20,7 +20,10 @@ repositories {
 dependencies {
     // Use JUnit test framework.
     testImplementation(libs.junit)
+    testImplementation(libs.junitParams)
     testImplementation(libs.mockito)
+
+    testRuntimeOnly(libs.junitEngine)
 
     // This dependency is used by the application.
     implementation(libs.guava)
@@ -40,6 +43,7 @@ tasks.getByName("run", JavaExec::class) {
 }
 
 tasks.test {
+    useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
 }
 tasks.jacocoTestReport {
