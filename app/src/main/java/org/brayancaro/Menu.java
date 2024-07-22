@@ -26,6 +26,8 @@ import org.brayancaro.prompts.Prompt;
 import org.brayancaro.prompts.PromptInt;
 import org.brayancaro.records.Coordinate;
 
+import com.googlecode.lanterna.TextColor;
+import com.googlecode.lanterna.graphics.SimpleTheme;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
@@ -50,6 +52,7 @@ public class Menu {
         try (var terminal = defaultTerminalFactory.createTerminal();
                 var screen = new TerminalScreen(terminal);
                 var scanner = new Scanner(System.in)) {
+
             (new Menu())
                     .setScanner(scanner)
                     .random(new SecureRandom())
@@ -404,6 +407,14 @@ public class Menu {
     public Menu screen(Screen screen) {
         this.screen = screen;
         this.gui = new MultiWindowTextGUI(screen);
+        this.gui.setTheme(SimpleTheme.makeTheme(true,
+                TextColor.ANSI.WHITE,
+                TextColor.ANSI.BLACK,
+                TextColor.ANSI.WHITE_BRIGHT,
+                TextColor.ANSI.BLACK_BRIGHT,
+                TextColor.ANSI.WHITE_BRIGHT,
+                TextColor.ANSI.BLACK_BRIGHT,
+                TextColor.ANSI.BLACK));
 
         return this;
     }
