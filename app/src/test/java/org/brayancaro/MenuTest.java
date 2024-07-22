@@ -73,58 +73,6 @@ class MenuTest {
     }
 
     @Test
-    void playerCanWinAndSaveGame() throws Exception {
-        Mockito.when(terminal.pollInput()).thenReturn(
-                // mock user keys: press first option and then submit
-
-                new KeyStroke(KeyType.Enter),
-                new KeyStroke(KeyType.Tab),
-                new KeyStroke(KeyType.Enter),
-                null, // required to indicate no more input
-
-                // view stats
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null,
-
-                // view stats
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null,
-
-                // exit game
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
-                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null // required to indicate no more input
-        );
-
-        menu.setScanner(new Scanner("""
-                1 # start game
-                8 # rows
-                8 # columns
-                1 # bombs
-                1 1
-                v
-                s
-                name-for-saving-game
-
-                2 # see game
-
-                """))
-                .play();
-
-        assertTrue(true);
-    }
-
-    @Test
     void playerCanQuitGameAfterStarting() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
@@ -325,8 +273,8 @@ class MenuTest {
                 Arguments.arguments(
                         Named.named("start a game, win, and quit",
                                 new KeyStroke[][] {
-                                    enterGameKeyStrokes(),
-                                    simulateExitStrokes(),
+                                        enterGameKeyStrokes(),
+                                        simulateExitStrokes(),
                                 }),
                         """
                                 8 # rows
@@ -335,7 +283,37 @@ class MenuTest {
                                 1 1
                                 v
                                 n
-                                """));
+                                """),
+                Arguments.arguments(
+                        Named.named("start, play, reveal cell, see stats and quit",
+                                new KeyStroke[][] {
+                                        enterGameKeyStrokes(),
+                                        viewGameStartsStrokes(),
+                                        simulateExitStrokes(),
+                                }),
+                        """
+                                1 # start game
+                                8 # rows
+                                8 # columns
+                                1 # bombs
+                                1 1
+                                v
+                                s
+                                name-for-saving-game
+
+                                2 # see game
+
+                                    """));
+    }
+
+    private static KeyStroke[] viewGameStartsStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        };
     }
 
     /**
