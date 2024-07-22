@@ -4,8 +4,6 @@
 package org.brayancaro;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -15,7 +13,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -70,58 +67,6 @@ class MenuTest {
                 });
 
         assertDoesNotThrow(() -> menu.setScanner(new Scanner(scannerSource)).play());
-    }
-
-    @Test
-    void playerCannotEraseMissingFile() throws Exception {
-        Mockito.when(terminal.pollInput()).thenReturn(
-                // erase data
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null,
-
-                // exit game
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
-                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null // required to indicate no more input
-        );
-
-        menu.setScanner(new Scanner("")).play();
-
-        assertTrue(true);
-    }
-
-    @Test
-    void playerCannotSeeMissingFile() throws Exception {
-        Mockito.when(terminal.pollInput()).thenReturn(
-                // view stats
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null,
-
-                // exit game
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
-                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null // required to indicate no more input
-        );
-
-        menu.setScanner(new Scanner("""
-                """)).play();
-
-        assertTrue(true);
     }
 
     static Stream<Arguments> playerCanWinAGame() {
@@ -210,7 +155,23 @@ class MenuTest {
                                 s
                                 name-for-saving-game
                                 <white space for confirm file saved>
-                                """));
+                                """),
+                Arguments.arguments(
+                        Named.named(
+                                "try delete stats (that isn't present) without exceptions",
+                                new KeyStroke[][] {
+                                        deleteGameStatsStrokes(),
+                                        simulateExitStrokes(),
+                                }),
+                        "<no-scan-data-required"),
+                Arguments.arguments(
+                        Named.named(
+                                "try see stats (that isn't present) without exceptions",
+                                new KeyStroke[][] {
+                                        viewGameStartsStrokes(),
+                                        simulateExitStrokes(),
+                                }),
+                        "<no-scan-data-required"));
     }
 
     private static KeyStroke[] deleteGameStatsStrokes() {
