@@ -74,8 +74,8 @@ class MenuTest {
                 Arguments.arguments(
                         Named.named("start a game, win, and quit",
                                 new KeyStroke[][] {
-                                        enterGameKeyStrokes(),
-                                        simulateExitStrokes(),
+                                        getStartGameKeyStrokes(),
+                                        getSimulateExitKeyStrokes(),
                                 }),
                         """
                                 8 # rows
@@ -88,9 +88,9 @@ class MenuTest {
                 Arguments.arguments(
                         Named.named("start, play, reveal cell, see stats and quit",
                                 new KeyStroke[][] {
-                                        enterGameKeyStrokes(),
-                                        viewGameStartsStrokes(),
-                                        simulateExitStrokes(),
+                                        getStartGameKeyStrokes(),
+                                        getViewStartsKeyStrokes(),
+                                        getSimulateExitKeyStrokes(),
                                 }),
                         """
                                 1 # start game
@@ -108,8 +108,8 @@ class MenuTest {
                         Named.named(
                                 "start, play, mark cell, reveal cell and quit",
                                 new KeyStroke[][] {
-                                        enterGameKeyStrokes(),
-                                        simulateExitStrokes(),
+                                        getStartGameKeyStrokes(),
+                                        getSimulateExitKeyStrokes(),
                                 }),
                         """
                                 8 # rows
@@ -124,8 +124,8 @@ class MenuTest {
                         Named.named(
                                 "start, play, toggle mark cell, reveal cell and quit",
                                 new KeyStroke[][] {
-                                        enterGameKeyStrokes(),
-                                        simulateExitStrokes(),
+                                        getStartGameKeyStrokes(),
+                                        getSimulateExitKeyStrokes(),
                                 }),
                         """
                                 8 # rows
@@ -142,9 +142,9 @@ class MenuTest {
                         Named.named(
                                 "start, play, toggle mark cell, reveal cell and quit",
                                 new KeyStroke[][] {
-                                        enterGameKeyStrokes(),
-                                        deleteGameStatsStrokes(),
-                                        simulateExitStrokes(),
+                                        getStartGameKeyStrokes(),
+                                        getDeleteStatsKeyStrokes(),
+                                        getSimulateExitKeyStrokes(),
                                 }),
                         """
                                 8 # rows
@@ -160,21 +160,21 @@ class MenuTest {
                         Named.named(
                                 "try delete stats (that isn't present) without exceptions",
                                 new KeyStroke[][] {
-                                        deleteGameStatsStrokes(),
-                                        simulateExitStrokes(),
+                                        getDeleteStatsKeyStrokes(),
+                                        getSimulateExitKeyStrokes(),
                                 }),
                         "<no-scan-data-required"),
                 Arguments.arguments(
                         Named.named(
                                 "try see stats (that isn't present) without exceptions",
                                 new KeyStroke[][] {
-                                        viewGameStartsStrokes(),
-                                        simulateExitStrokes(),
+                                        getViewStartsKeyStrokes(),
+                                        getSimulateExitKeyStrokes(),
                                 }),
                         "<no-scan-data-required"));
     }
 
-    private static KeyStroke[] deleteGameStatsStrokes() {
+    private static KeyStroke[] getDeleteStatsKeyStrokes() {
         return new KeyStroke[] {
                 // erase data
                 new KeyStroke(KeyType.ArrowDown), // focus 2nd option
@@ -186,7 +186,7 @@ class MenuTest {
         };
     }
 
-    private static KeyStroke[] viewGameStartsStrokes() {
+    private static KeyStroke[] getViewStartsKeyStrokes() {
         return new KeyStroke[] {
                 new KeyStroke(KeyType.ArrowDown), // focus 2nd option
                 new KeyStroke(KeyType.Enter), // select
@@ -199,7 +199,7 @@ class MenuTest {
     /**
      * Mock user keys: press first option to start a game and then submit
      */
-    private static KeyStroke[] enterGameKeyStrokes() {
+    private static KeyStroke[] getStartGameKeyStrokes() {
         return new KeyStroke[] {
                 new KeyStroke(KeyType.Enter),
                 new KeyStroke(KeyType.Tab),
@@ -208,7 +208,7 @@ class MenuTest {
         };
     }
 
-    private static KeyStroke[] simulateExitStrokes() {
+    private static KeyStroke[] getSimulateExitKeyStrokes() {
         return new KeyStroke[] {
                 new KeyStroke(KeyType.ArrowDown), // focus 2nd option
                 new KeyStroke(KeyType.ArrowDown), // focus 3rd option
