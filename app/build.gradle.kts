@@ -21,9 +21,9 @@ dependencies {
     // Use JUnit test framework.
     testImplementation(libs.junit)
     testImplementation(libs.junitParams)
-    testRuntimeOnly(libs.junitEngine)
-
     testImplementation(libs.mockito)
+
+    testRuntimeOnly(libs.junitEngine)
 
     // This dependency is used by the application.
     implementation(libs.guava)
