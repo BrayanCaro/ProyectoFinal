@@ -12,9 +12,9 @@ mockito = "4.0.0"
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 junit = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
 lanterna = { module = "com.googlecode.lanterna:lanterna", version.ref = "lanterna" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-
 
 [plugins]
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }

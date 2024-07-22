@@ -20,6 +20,7 @@ repositories {
 dependencies {
     // Use JUnit test framework.
     testImplementation(libs.junit)
+    testImplementation(libs.junitParams)
     testRuntimeOnly(libs.junitEngine)
 
     testImplementation(libs.mockito)
