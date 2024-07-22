@@ -73,51 +73,6 @@ class MenuTest {
     }
 
     @Test
-    void playerCanEraseData() throws Exception {
-        Mockito.when(terminal.pollInput()).thenReturn(
-                // mock user keys: press first option and then submit
-                new KeyStroke(KeyType.Enter),
-                new KeyStroke(KeyType.Tab),
-                new KeyStroke(KeyType.Enter),
-                null, // required to indicate no more input
-
-                // erase data
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null,
-
-                // exit game
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
-                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null // required to indicate no more input
-        );
-
-        menu.setScanner(new Scanner("""
-                8 # rows
-                8 # columns
-                1 # bombs
-                1 1
-                v
-                s
-                name-for-saving-game
-
-                2 # see game
-
-                3
-                """))
-                .play();
-
-        assertTrue(true);
-    }
-
-    @Test
     void playerCannotEraseMissingFile() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // erase data
@@ -237,7 +192,37 @@ class MenuTest {
                                 m
                                 1 1
                                 v
+                                """),
+                Arguments.arguments(
+                        Named.named(
+                                "start, play, toggle mark cell, reveal cell and quit",
+                                new KeyStroke[][] {
+                                        enterGameKeyStrokes(),
+                                        deleteGameStatsStrokes(),
+                                        simulateExitStrokes(),
+                                }),
+                        """
+                                8 # rows
+                                8 # columns
+                                1 # bombs
+                                1 1
+                                v
+                                s
+                                name-for-saving-game
+                                <white space for confirm file saved>
                                 """));
+    }
+
+    private static KeyStroke[] deleteGameStatsStrokes() {
+        return new KeyStroke[] {
+                // erase data
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
     }
 
     private static KeyStroke[] viewGameStartsStrokes() {
