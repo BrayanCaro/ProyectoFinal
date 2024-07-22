@@ -73,39 +73,6 @@ class MenuTest {
     }
 
     @Test
-    void playerCanWinAfterMarkingCell() throws Exception {
-        Mockito.when(terminal.pollInput()).thenReturn(
-                // mock user keys: press first option and then submit
-                new KeyStroke(KeyType.Enter),
-                new KeyStroke(KeyType.Tab),
-                new KeyStroke(KeyType.Enter),
-                null, // required to indicate no more input
-
-                // exit game
-                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
-                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
-                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
-                new KeyStroke(KeyType.Enter), // select
-                new KeyStroke(KeyType.Tab), // submit
-                new KeyStroke(KeyType.Enter),
-                null // required to indicate no more input
-        );
-
-        menu.setScanner(new Scanner("""
-                8 # rows
-                8 # columns
-                63 # bombs
-                6 1
-                m
-                1 1
-                v
-                """))
-                .play();
-
-        assertTrue(true);
-    }
-
-    @Test
     void playerCanWinAfterTogglingCell() throws Exception {
         Mockito.when(terminal.pollInput()).thenReturn(
                 // mock user keys: press first option and then submit
@@ -270,9 +237,24 @@ class MenuTest {
                                 s
                                 name-for-saving-game
 
-                                2 # see game
-
-                                    """));
+                                <white space for confirmation stats>
+                                    """),
+                Arguments.arguments(
+                        Named.named(
+                                "start, play, mark cell, reveal cell and quit",
+                                new KeyStroke[][] {
+                                        enterGameKeyStrokes(),
+                                        simulateExitStrokes(),
+                                }),
+                        """
+                                8 # rows
+                                8 # columns
+                                63 # bombs
+                                6 1
+                                m
+                                1 1
+                                v
+                                """));
     }
 
     private static KeyStroke[] viewGameStartsStrokes() {
