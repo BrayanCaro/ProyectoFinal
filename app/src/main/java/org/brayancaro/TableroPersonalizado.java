@@ -14,14 +14,13 @@ import java.util.Random;
 
 import org.brayancaro.enums.cell.State;
 import org.brayancaro.records.Coordinate;
+import org.brayancaro.records.menu.Configuration;
 
 public class TableroPersonalizado extends Tablero {
 
     private static final long serialVersionUID = 42l;
 
-    protected int rows;
-
-    protected int columns;
+    protected Configuration configuration;
 
     protected ZonedDateTime startedAt;
 
@@ -29,30 +28,21 @@ public class TableroPersonalizado extends Tablero {
 
     /**
      * Constructor de un tablero con celdas a partir de un numero de bombas a poner
-     * @param filas - Indica la cantidad de filas del tablero
-     * @param columnas - Indica la cantidad de columnas del tablero
-     * @param numeroDeBombasParaPoner - Indica la cantidad de bombas que tendra el tablero
      */
-    public TableroPersonalizado(
-        int filas,
-        int columnas,
-        int numeroDeBombasParaPoner,
-        Random random
-    ) throws IllegalArgumentException {
-        rows = filas;
-        columns = columnas;
+    public TableroPersonalizado(Configuration configuration, Random random) throws IllegalArgumentException {
+        this.configuration = configuration;
 
         startedAt = ZonedDateTime.now();
 
         random(random);
 
-        if (numeroDeBombasParaPoner <= 0) {
+        if (configuration.bombCount() <= 0) {
             throw new IllegalArgumentException("Necesitas poner mas bombas");
         }
-        if (numeroDeBombasParaPoner >= filas * columnas) {
+        if (configuration.bombCount() >= configuration.rows() * configuration.columns()) {
             throw new IllegalArgumentException("Necesitas poner menos bombas");
         }
-        celdas = new Celdas[filas][columnas];
+        celdas = new Celdas[configuration.rows()][configuration.columns()];
 
         for (int i = 0; i < celdas.length; i++) {
             for (int j = 0; j < celdas[0].length; j++) {
@@ -60,7 +50,7 @@ public class TableroPersonalizado extends Tablero {
             }
         }
 
-        for (int i = 0; i < numeroDeBombasParaPoner; i++) {
+        for (int i = 0; i < configuration.bombCount(); i++) {
             int numeroAleratorioFilas = super.numeroEnteroAleatorio(
                 this.celdas.length - 1
             );
@@ -300,8 +290,8 @@ public class TableroPersonalizado extends Tablero {
 
         var coordinates = new ArrayList<Coordinate>();
 
-        for (int i = Math.max(0, x - 1); i <= Math.min(rows - 1, x + 1); i++) {
-            for (int j = Math.max(0, y - 1); j <= Math.min(columns - 1, y + 1); j++) {
+        for (int i = Math.max(0, x - 1); i <= Math.min(configuration.rows() - 1, x + 1); i++) {
+            for (int j = Math.max(0, y - 1); j <= Math.min(configuration.columns() - 1, y + 1); j++) {
                 if (i == x && j == y) {
                     continue;
                 }

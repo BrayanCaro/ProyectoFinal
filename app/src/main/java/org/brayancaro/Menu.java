@@ -25,6 +25,7 @@ import org.brayancaro.gui.windows.AskOptionWindow;
 import org.brayancaro.prompts.Prompt;
 import org.brayancaro.prompts.PromptInt;
 import org.brayancaro.records.Coordinate;
+import org.brayancaro.records.menu.Configuration;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.SimpleTheme;
@@ -132,11 +133,9 @@ public class Menu {
                 .printTitleUsing(System.out::print)
                 .ask();
 
-        var board = new TableroPersonalizado(
-                filas,
-                columnas,
-                bombas,
-                random);
+        var config = new Configuration(filas, columnas, bombas);
+
+        var board = new TableroPersonalizado(config, random);
 
         System.out.println(board);
         System.out.println("EMPECEMOS");
