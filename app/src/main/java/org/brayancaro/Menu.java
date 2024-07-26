@@ -22,9 +22,10 @@ import java.util.regex.Pattern;
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.enums.cell.State;
 import org.brayancaro.gui.windows.AskOptionWindow;
+import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
 import org.brayancaro.prompts.Prompt;
-import org.brayancaro.prompts.PromptInt;
 import org.brayancaro.records.Coordinate;
+import org.brayancaro.records.menu.Configuration;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.SimpleTheme;
@@ -108,35 +109,9 @@ public class Menu {
     }
 
     private void startGame(Option option) throws Exception, IOException {
-        var filas = new PromptInt()
-                .min(8)
-                .max(29)
-                .scanner(scanner)
-                .title("¿Con cuantas filas? ")
-                .printTitleUsing(System.out::print)
-                .ask();
-
-        var columnas = new PromptInt()
-                .min(8)
-                .max(29)
-                .scanner(scanner)
-                .title("¿Con cuantas columnas? ")
-                .printTitleUsing(System.out::print)
-                .ask();
-
-        var bombas = new PromptInt()
-                .min(1)
-                .max((filas * columnas) - 1)
-                .scanner(scanner)
-                .title("¿Con cuantas bombas? ")
-                .printTitleUsing(System.out::print)
-                .ask();
-
-        var board = new TableroPersonalizado(
-                filas,
-                columnas,
-                bombas,
-                random);
+        var config = askConfiguration();
+        var bombas = config.bombCount();
+        var board = new TableroPersonalizado(config, random);
 
         System.out.println(board);
         System.out.println("EMPECEMOS");
@@ -274,6 +249,12 @@ public class Menu {
         AskOptionWindow optionWindow = new AskOptionWindow();
         gui.addWindowAndWait(optionWindow);
         return optionWindow.getOptionSelected();
+    }
+
+    protected Configuration askConfiguration() {
+        var askConfigWindow = new AskUnsignedIntegerWindow();
+        gui.addWindowAndWait(askConfigWindow);
+        return askConfigWindow.getConfiguration();
     }
 
     /**
