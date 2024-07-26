@@ -75,12 +75,10 @@ class MenuTest {
                         Named.named("start a game, win, and quit",
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
+                                        getBoardConfigKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                8 # rows
-                                8 # columns
-                                1 # bombs
                                 1 1
                                 v
                                 n
@@ -89,32 +87,27 @@ class MenuTest {
                         Named.named("start, play, reveal cell, see stats and quit",
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
+                                        getBoardConfigKeyStrokes(),
                                         getViewStartsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                1 # start game
-                                8 # rows
-                                8 # columns
-                                1 # bombs
                                 1 1
                                 v
                                 s
                                 name-for-saving-game
 
                                 <white space for confirmation stats>
-                                    """),
+                                """),
                 Arguments.arguments(
                         Named.named(
                                 "start, play, mark cell, reveal cell and quit",
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
+                                        getBoardConfigFullKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                8 # rows
-                                8 # columns
-                                63 # bombs
                                 6 1
                                 m
                                 1 1
@@ -125,12 +118,10 @@ class MenuTest {
                                 "start, play, toggle mark cell, reveal cell and quit",
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
+                                        getBoardConfigFullKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                8 # rows
-                                8 # columns
-                                63 # bombs
                                 6 1
                                 m
                                 6 1
@@ -143,13 +134,11 @@ class MenuTest {
                                 "start, play, toggle mark cell, reveal cell and quit",
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
+                                        getBoardConfigKeyStrokes(),
                                         getDeleteStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                8 # rows
-                                8 # columns
-                                1 # bombs
                                 1 1
                                 v
                                 s
@@ -172,6 +161,33 @@ class MenuTest {
                                         getSimulateExitKeyStrokes(),
                                 }),
                         "<no-scan-data-required"));
+    }
+
+    private static KeyStroke[] getBoardConfigKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('1'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getBoardConfigFullKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('6'), false, false),
+                new KeyStroke(Character.valueOf('3'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
     }
 
     private static KeyStroke[] getDeleteStatsKeyStrokes() {
