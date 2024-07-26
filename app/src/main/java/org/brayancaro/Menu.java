@@ -24,7 +24,6 @@ import org.brayancaro.enums.cell.State;
 import org.brayancaro.gui.windows.AskOptionWindow;
 import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
 import org.brayancaro.prompts.Prompt;
-import org.brayancaro.prompts.PromptInt;
 import org.brayancaro.records.Coordinate;
 import org.brayancaro.records.menu.Configuration;
 
