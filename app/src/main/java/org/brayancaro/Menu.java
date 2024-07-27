@@ -14,13 +14,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
-import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import org.brayancaro.enums.menu.Option;
 import org.brayancaro.enums.cell.State;
+import org.brayancaro.enums.menu.Option;
 import org.brayancaro.gui.windows.AskOptionWindow;
 import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
 import org.brayancaro.prompts.Prompt;
@@ -118,7 +117,7 @@ public class Menu {
         System.out.println("Hay " + bombas + " bombas en el mapa");
         do {
             try {
-                executeChangeCellState(bombas, board);
+                executeChangeCellState(board);
             } catch (TocasteUnaBombaExcepcion e) {
                 board.mostrarTodasLasBombas();
                 System.out.println("\033[33m" + board + "\033[0m");
@@ -177,30 +176,19 @@ public class Menu {
         }
     }
 
-    private void executeChangeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario) throws Exception {
+    private void executeChangeCellState(TableroPersonalizado board) throws Exception {
         var coordinate = askCoordinate();
         var stateAction = askShouldReveal();
-        changeCellState(bombas, tableroDelUsuario, coordinate, stateAction);
+        changeCellState(board, coordinate, stateAction);
     }
 
-    private void changeCellState(Integer bombas, TableroPersonalizado tableroDelUsuario, Coordinate coordinate,
-            State stateAction) throws Exception {
-        try {
-            tableroDelUsuario.execute(coordinate, stateAction);
-            System.out.printf("""
-                    Quedan %d casillas sin ver.
-                    Hay %s bombas en el mapa
-                    """, tableroDelUsuario.jugadorGanoSinMarcas(), bombas);
-            System.out.println(tableroDelUsuario);
-        } catch (NumberFormatException e) {
-            System.out.println("El comando solo puede tener 2 numeros separados por un espacio");
-        } catch (InputMismatchException e) {
-            System.out.println(e);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println(e);
-        } catch (IllegalAccessException e) {
-            System.out.println(e);
-        }
+    private void changeCellState(TableroPersonalizado board, Coordinate coordinate, State stateAction) throws Exception {
+        board.execute(coordinate, stateAction);
+        System.out.printf("""
+                Quedan %d casillas sin ver.
+                Hay %s bombas en el mapa
+                """, board.jugadorGanoSinMarcas(), board.configuration.bombCount());
+        System.out.println(board);
     }
 
     private boolean askShouldSaveGame() {

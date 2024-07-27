@@ -310,4 +310,7 @@ public class TableroPersonalizado extends Tablero {
         this.endedAt = ZonedDateTime.now();
     }
 
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 }
