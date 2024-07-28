@@ -11,6 +11,7 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import org.brayancaro.gui.components.MinesweeperButton;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Timeout;
@@ -117,6 +118,7 @@ class MenuTest {
                                         getStartGameKeyStrokes(),
                                         getBoardConfigFullKeyStrokes(),
                                         getConfirmStartGameKeyStrokes(),
+                                        getToggleFlagKeyStrokes(),
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
@@ -131,6 +133,8 @@ class MenuTest {
                                         getStartGameKeyStrokes(),
                                         getBoardConfigKeyStrokes(),
                                         getConfirmStartGameKeyStrokes(),
+                                        getToggleFlagKeyStrokes(),
+                                        getToggleFlagKeyStrokes(),
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
                                         getDeleteStatsKeyStrokes(),
@@ -175,6 +179,13 @@ class MenuTest {
     private static KeyStroke[] getConfirmStartGameKeyStrokes() {
         return new KeyStroke[] {
                 new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getToggleFlagKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(MinesweeperButton.MARK_CELL_CHARACTER, false, false),
                 null,
         };
     }
