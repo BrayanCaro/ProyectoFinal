@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.gui.windows.AskOptionWindow;
+import org.brayancaro.gui.windows.AskSaveStatsWindow;
 import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
 import org.brayancaro.gui.windows.GameWindow;
 import org.brayancaro.prompts.Prompt;
@@ -136,8 +137,6 @@ public class Menu {
     private void executeSaveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
         if (askShouldSaveGame()) {
             saveGame(tableroDelUsuario);
-        } else {
-            System.out.println();
         }
     }
 
@@ -164,16 +163,9 @@ public class Menu {
     }
 
     private boolean askShouldSaveGame() {
-        Pattern pattern = Pattern.compile("\\s*[sn]\\s*", Pattern.CASE_INSENSITIVE);
-
-        return new Prompt()
-                .pattern(pattern)
-                .scanner(scanner)
-                .title("¿Quieres guardar tu partida? (s/n) ")
-                .printTitleUsing(System.out::print)
-                .ask()
-                .toLowerCase()
-                .contains("s");
+        var window = new AskSaveStatsWindow();
+        gui.addWindowAndWait(window);
+        return window.canSaveStats();
     }
 
     protected Option askOption() {

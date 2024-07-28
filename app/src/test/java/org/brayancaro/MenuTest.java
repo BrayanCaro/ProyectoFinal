@@ -89,11 +89,10 @@ class MenuTest {
                                         getConfirmStartGameKeyStrokes(),
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
+                                        getDontSaveStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
-                        """
-                                n
-                                """),
+                        ""),
                 Arguments.arguments(
                         Named.named("start, play, reveal cell, see stats and quit",
                                 new KeyStroke[][] {
@@ -103,12 +102,12 @@ class MenuTest {
                                         getConfirmStartGameKeyStrokes(),
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
+                                        getSaveStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                s
                                 name-for-saving-game
-
+                                <white space for confirm file saved>
                                 <white space for confirmation stats>
                                 """),
                 Arguments.arguments(
@@ -121,11 +120,10 @@ class MenuTest {
                                         getToggleFlagKeyStrokes(),
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
+                                        getDontSaveStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
-                        """
-                                v
-                                """),
+                        ""),
                 Arguments.arguments(
                         Named.named(
                                 "start, play, toggle mark cell, reveal cell and quit",
@@ -138,10 +136,10 @@ class MenuTest {
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
                                         getDeleteStatsKeyStrokes(),
+                                        getSaveStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                s
                                 name-for-saving-game
                                 <white space for confirm file saved>
                                 """),
@@ -261,6 +259,26 @@ class MenuTest {
                 new KeyStroke(KeyType.Tab), // submit
                 new KeyStroke(KeyType.Enter),
                 null, // required to indicate no more input
+        };
+    }
+
+    private static KeyStroke[] getDontSaveStatsKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        };
+    }
+
+    private static KeyStroke[] getSaveStatsKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
         };
     }
 }
