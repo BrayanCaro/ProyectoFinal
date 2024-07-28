@@ -41,7 +41,6 @@ public class GameWindow extends BasicWindow {
                         board.mostrarTodasLasBombas();
                         close();
                     } catch (Exception e) {
-                        e.printStackTrace();
                         close();
                     } finally {
                         if (board.jugadorGanoSinMarcas() == configuration.bombCount()) {
