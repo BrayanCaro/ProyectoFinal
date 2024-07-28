@@ -32,6 +32,8 @@ class MenuTest {
 
     private IOSafeTerminal terminal;
 
+    private boolean hasConsumeAllKeyStrokes = false;
+
     @BeforeEach
     public void init() throws IOException {
         new File(Menu.SAVED_FILE_PATH).delete();
@@ -48,7 +50,7 @@ class MenuTest {
 
     @ParameterizedTest
     @MethodSource
-    @Timeout(value = 1, unit = TimeUnit.MINUTES)
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
     void playerCanWinAGame(KeyStroke[][] groupKeyStrokes, String scannerSource) {
         var keyStrokesIterator = Stream.of(groupKeyStrokes)
                 .flatMap(Stream::of)
@@ -58,11 +60,18 @@ class MenuTest {
                 new Answer<KeyStroke>() {
                     @Override
                     public KeyStroke answer(InvocationOnMock invocation) {
-                        return keyStrokesIterator.hasNext()
-                                ? keyStrokesIterator.next()
-                                // skip flush when closing the screen
-                                // https://github.com/mabe02/lanterna/blob/5b839cc52ccfff7ba56a7da40a753037af802893/src/main/java/com/googlecode/lanterna/screen/TerminalScreen.java#L120-L127
-                                : new KeyStroke(KeyType.EOF);
+                        if (hasConsumeAllKeyStrokes) {
+                            throw new RuntimeException("All the keys storkes have been consumed");
+                        }
+
+                        if (keyStrokesIterator.hasNext()) {
+                            return keyStrokesIterator.next();
+                        } else {
+                            // skip flush when closing the screen
+                            // https://github.com/mabe02/lanterna/blob/5b839cc52ccfff7ba56a7da40a753037af802893/src/main/java/com/googlecode/lanterna/screen/TerminalScreen.java#L120-L127
+                            hasConsumeAllKeyStrokes = true;
+                            return new KeyStroke(KeyType.EOF);
+                        }
                     }
                 });
 
@@ -76,11 +85,12 @@ class MenuTest {
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
                                         getBoardConfigKeyStrokes(),
+                                        getConfirmStartGameKeyStrokes(),
+                                        getClickFirstCellKeyStrokes(),
+                                        getFinishGameModalKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                1 1
-                                v
                                 n
                                 """),
                 Arguments.arguments(
@@ -89,11 +99,12 @@ class MenuTest {
                                         getStartGameKeyStrokes(),
                                         getBoardConfigKeyStrokes(),
                                         getViewStartsKeyStrokes(),
+                                        getConfirmStartGameKeyStrokes(),
+                                        getClickFirstCellKeyStrokes(),
+                                        getFinishGameModalKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                1 1
-                                v
                                 s
                                 name-for-saving-game
 
@@ -105,28 +116,12 @@ class MenuTest {
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
                                         getBoardConfigFullKeyStrokes(),
+                                        getConfirmStartGameKeyStrokes(),
+                                        getClickFirstCellKeyStrokes(),
+                                        getFinishGameModalKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                6 1
-                                m
-                                1 1
-                                v
-                                """),
-                Arguments.arguments(
-                        Named.named(
-                                "start, play, toggle mark cell, reveal cell and quit",
-                                new KeyStroke[][] {
-                                        getStartGameKeyStrokes(),
-                                        getBoardConfigFullKeyStrokes(),
-                                        getSimulateExitKeyStrokes(),
-                                }),
-                        """
-                                6 1
-                                m
-                                6 1
-                                m
-                                1 1
                                 v
                                 """),
                 Arguments.arguments(
@@ -135,12 +130,13 @@ class MenuTest {
                                 new KeyStroke[][] {
                                         getStartGameKeyStrokes(),
                                         getBoardConfigKeyStrokes(),
+                                        getConfirmStartGameKeyStrokes(),
+                                        getClickFirstCellKeyStrokes(),
+                                        getFinishGameModalKeyStrokes(),
                                         getDeleteStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                1 1
-                                v
                                 s
                                 name-for-saving-game
                                 <white space for confirm file saved>
@@ -171,6 +167,27 @@ class MenuTest {
                 new KeyStroke(KeyType.ArrowDown),
                 new KeyStroke(Character.valueOf('1'), false, false),
                 new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getConfirmStartGameKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getFinishGameModalKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getClickFirstCellKeyStrokes() {
+        return new KeyStroke[] {
                 new KeyStroke(KeyType.Enter),
                 null,
         };

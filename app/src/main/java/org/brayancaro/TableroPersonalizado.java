@@ -93,7 +93,7 @@ public class TableroPersonalizado extends Tablero {
         }
 
         if (celdas[cordenadaX][cordenadaY].haSidoVista()) {
-            throw new IllegalAccessException("Esta celda ya es visible");
+            return;
         }
 
         if (celdas[cordenadaX][cordenadaY].obtenerEstaEstaMarcada()) {
@@ -121,8 +121,7 @@ public class TableroPersonalizado extends Tablero {
     }
 
     public void elegirCelda(Coordinate coordinate) throws IndexOutOfBoundsException, IllegalAccessException, TocasteUnaBombaExcepcion, Exception {
-        // FIXME: resolve wrong parameters, affects only non quadratic boards
-        elegirCelda(coordinate.y(), coordinate.x());
+        elegirCelda(coordinate.x(), coordinate.y());
     }
 
     /**
@@ -262,19 +261,6 @@ public class TableroPersonalizado extends Tablero {
     }
 
     /**
-     * Metodo auxilar para centrar textos
-     * @return String -- Los espacios en blanco centrados
-     */
-    public String centrar() {
-        int largo = (celdas.length * 5 - 35) / 2;
-        String salida = "";
-        for (int i = 0; i < largo; i++) {
-            salida += " ";
-        }
-        return (salida);
-    }
-
-    /**
      * TODO improve error handling
      */
     public void execute(Coordinate coordinate, State state) throws Exception {
@@ -312,5 +298,9 @@ public class TableroPersonalizado extends Tablero {
 
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    public Celdas getCell(Coordinate coordinate) {
+        return celdas[coordinate.x()][coordinate.y()];
     }
 }

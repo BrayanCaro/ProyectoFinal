@@ -18,17 +18,17 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import org.brayancaro.enums.cell.State;
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.gui.windows.AskOptionWindow;
 import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
+import org.brayancaro.gui.windows.GameWindow;
 import org.brayancaro.prompts.Prompt;
-import org.brayancaro.records.Coordinate;
 import org.brayancaro.records.menu.Configuration;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.SimpleTheme;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -68,7 +68,9 @@ public class Menu {
         Option option = null;
         do {
             option = askOption();
-            realizarAccion(option);
+            if (option instanceof Option) {
+                realizarAccion(option);
+            }
         } while (option != Option.QUIT);
 
         screen.stopScreen();
@@ -79,7 +81,7 @@ public class Menu {
      */
     public void realizarAccion(Option option) throws Exception {
         switch (option) {
-            case Option.START -> startGame(option);
+            case Option.START -> startGame();
             case Option.SHOW_HISTORY -> {
                 try {
                     tabla(cargarDatosDeUnArchivo());
@@ -107,51 +109,39 @@ public class Menu {
         }
     }
 
-    private void startGame(Option option) throws Exception, IOException {
+    private void startGame() throws IOException {
         var config = askConfiguration();
-        var bombas = config.bombCount();
         var board = new TableroPersonalizado(config, random);
-
-        System.out.println(board);
-        System.out.println("EMPECEMOS");
-        System.out.println("Hay " + bombas + " bombas en el mapa");
-        do {
-            try {
-                executeChangeCellState(board);
-            } catch (TocasteUnaBombaExcepcion e) {
-                board.mostrarTodasLasBombas();
-                System.out.println("\033[33m" + board + "\033[0m");
-                System.out.println(board.centrar() + " 🚫🚫🚫🚫🚫🚫 Perdiste 🚫🚫🚫🚫🚫🚫\n");
-                break;
-            }
-            option = handleWinningState(option, bombas, board);
-        } while (board.jugadorGanoSinMarcas() != bombas &&
-                option != Option.QUIT);
+        new MessageDialogBuilder()
+                .setTitle("EMPECEMOS")
+                .setText("")
+                .build()
+                .showDialog(gui);
+        var gameWindow = new GameWindow(board);
+        gui.addWindowAndWait(gameWindow);
+        handleWinningState(board);
     }
 
-    private Option handleWinningState(Option option, Integer bombas, TableroPersonalizado board) throws IOException {
-        if (board.jugadorGanoSinMarcas() == bombas) {
-            board.ganador();
-            System.out.println("\n" + board);
-            System.out.println(
-                    board.centrar() +
-                            " 🎉🎊🎉🎊🎉🎊 !GANASTE! 🎉🎊🎉🎊🎉🎊\n");
-
-            executeSaveGame(bombas, board);
-            option = Option.QUIT;
+    private void handleWinningState(TableroPersonalizado board) throws IOException {
+        if (board.jugadorGanoSinMarcas() == board.getConfiguration().bombCount()) {
+            new MessageDialogBuilder()
+                    .setTitle("GANASTE")
+                    .setText("")
+                    .build()
+                    .showDialog(gui);
+            executeSaveGame(board);
         }
-        return option;
     }
 
-    private void executeSaveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+    private void executeSaveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
         if (askShouldSaveGame()) {
-            saveGame(bombas, tableroDelUsuario);
+            saveGame(tableroDelUsuario);
         } else {
             System.out.println();
         }
     }
 
-    private void saveGame(Integer bombas, TableroPersonalizado tableroDelUsuario) throws IOException {
+    private void saveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
         var username = new Prompt()
                 .scanner(scanner)
                 .title("¿Cual es tu nombre? ")
@@ -160,10 +150,7 @@ public class Menu {
                 .toLowerCase()
                 .trim();
 
-        grabar(
-                tableroDelUsuario,
-                username,
-                bombas);
+        grabar(tableroDelUsuario, username);
 
         guardarDatos();
 
@@ -174,21 +161,6 @@ public class Menu {
         for (int i = 0; i < 45; i++) {
             System.out.println();
         }
-    }
-
-    private void executeChangeCellState(TableroPersonalizado board) throws Exception {
-        var coordinate = askCoordinate();
-        var stateAction = askShouldReveal();
-        changeCellState(board, coordinate, stateAction);
-    }
-
-    private void changeCellState(TableroPersonalizado board, Coordinate coordinate, State stateAction) throws Exception {
-        board.execute(coordinate, stateAction);
-        System.out.printf("""
-                Quedan %d casillas sin ver.
-                Hay %s bombas en el mapa
-                """, board.jugadorGanoSinMarcas(), board.configuration.bombCount());
-        System.out.println(board);
     }
 
     private boolean askShouldSaveGame() {
@@ -202,35 +174,6 @@ public class Menu {
                 .ask()
                 .toLowerCase()
                 .contains("s");
-    }
-
-    private State askShouldReveal() {
-        Pattern pattern = Pattern.compile("\\s*[mv]\\s*", Pattern.CASE_INSENSITIVE);
-
-        var isRevealed = new Prompt()
-                .pattern(pattern)
-                .scanner(scanner)
-                .title("¿Quieres marcar o ver esa celda? (m/v) ")
-                .printTitleUsing(System.out::print)
-                .ask()
-                .trim()
-                .toLowerCase()
-                .contains("v");
-
-        return isRevealed ? State.REVEALED : State.MARKED;
-    }
-
-    private Coordinate askCoordinate() {
-        Pattern pattern = Pattern.compile(Coordinate.PATTERN);
-
-        var value = new Prompt()
-                .pattern(pattern)
-                .scanner(scanner)
-                .title("Introduce la cordenada > ")
-                .printTitleUsing(System.out::print)
-                .ask();
-
-        return Coordinate.parse(value);
     }
 
     protected Option askOption() {
@@ -347,8 +290,7 @@ public class Menu {
 
     public static void grabar(
             TableroPersonalizado tablero,
-            String nombre,
-            int bombas) {
+            String nombre) {
         if (datos[19][0] != null) {
             throw new IllegalArgumentException("El tablero esta lleno");
         }
@@ -358,7 +300,7 @@ public class Menu {
             if (datos[i][0] == null) {
                 datos[i][0] = nombre;
                 datos[i][1] = tablero.dimension();
-                datos[i][2] = bombas + "";
+                datos[i][2] = tablero.getConfiguration().bombCount() + "";
                 datos[i][3] = tablero.getEndedAt().format(DateTimeFormatter.RFC_1123_DATE_TIME);
                 aux = true;
             } else {
