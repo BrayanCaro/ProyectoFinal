@@ -32,7 +32,9 @@ public class GameWindow extends BasicWindow {
             for (int j = 0; j < configuration.rows(); j++) {
                 var coordinate = new Coordinate(i, j);
                 var cell = board.getCell(coordinate);
-                var button = new MinesweeperButton(cell.toString()).coordinate(coordinate);
+                var button = new MinesweeperButton(cell.toString())
+                    .coordinate(coordinate)
+                    .board(board);
 
                 button.addListener(btn -> {
                     try {

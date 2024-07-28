@@ -209,8 +209,7 @@ public class TableroPersonalizado extends Tablero {
     }
 
     public void marcarCelda(Coordinate coordinate) throws IndexOutOfBoundsException, IllegalAccessException {
-        // FIXME: resolve wrong parameters, affects only non quadratic boards
-        marcarCelda(coordinate.y(), coordinate.x());
+        marcarCelda(coordinate.x(), coordinate.y());
     }
 
     /**
