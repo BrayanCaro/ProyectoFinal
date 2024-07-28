@@ -25,42 +25,6 @@ public abstract class Tablero implements Serializable {
         return random.nextInt(0, valorMaximo + 1);
     }
 
-    /**
-     * Metodo para convertir una tablero a una cadena de caracteres
-     * @return String -- El tablero en formato de cadena
-     */
-    public String toString() {
-        String renglones = " ";
-        for (int w = 0; w < celdas[0].length; w++) {
-            if (w < 10) {
-                renglones += " |" + (w + 1) + "  ";
-            } else {
-                renglones += " |" + (w + 1) + " ";
-            }
-        }
-
-        renglones += "\n ";
-        for (int p = 0; p < celdas[0].length; p++) {
-            renglones += " --- ";
-        }
-        renglones += "\n";
-
-        for (int i = 0; i < celdas.length; i++) {
-            for (int j = 0; j < celdas[0].length; j++) {
-                renglones += " | " + celdas[i][j];
-            }
-            renglones += " | -" + (i + 1) + "\n ";
-            for (int k = 0; k < celdas[0].length; k++) {
-                renglones += " --- ";
-            }
-            if (i == (celdas.length - 1)) {} else {
-                renglones += "\n";
-            }
-        }
-
-        return renglones + "\b\b ";
-    }
-
     public Tablero random(Random random) {
         this.random = random;
 
