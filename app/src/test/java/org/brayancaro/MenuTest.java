@@ -4,6 +4,7 @@
 package org.brayancaro;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
@@ -103,13 +104,12 @@ class MenuTest {
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
                                         getSaveStatsKeyStrokes(),
+                                        getViewStartsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
-                                name-for-saving-game
-                                <white space for confirm file saved>
-                                <white space for confirmation stats>
-                                """),
+                        <white-space>
+                        """),
                 Arguments.arguments(
                         Named.named(
                                 "start, play, mark cell, reveal cell and quit",
@@ -139,10 +139,7 @@ class MenuTest {
                                         getSaveStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
-                        """
-                                name-for-saving-game
-                                <white space for confirm file saved>
-                                """),
+                        ""),
                 Arguments.arguments(
                         Named.named(
                                 "try delete stats (that isn't present) without exceptions",
@@ -150,7 +147,7 @@ class MenuTest {
                                         getDeleteStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
-                        "<no-scan-data-required"),
+                        ""),
                 Arguments.arguments(
                         Named.named(
                                 "try see stats (that isn't present) without exceptions",
@@ -158,7 +155,7 @@ class MenuTest {
                                         getViewStartsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
-                        "<no-scan-data-required"));
+                        ""));
     }
 
     private static KeyStroke[] getBoardConfigKeyStrokes() {
@@ -274,9 +271,15 @@ class MenuTest {
 
     private static KeyStroke[] getSaveStatsKeyStrokes() {
         return new KeyStroke[] {
-                new KeyStroke(KeyType.ArrowDown),
                 new KeyStroke(KeyType.Enter),
                 new KeyStroke(KeyType.Tab),
+                new KeyStroke('a', false, false),
+                new KeyStroke('b', false, false),
+                new KeyStroke('c', false, false),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
+
                 new KeyStroke(KeyType.Enter),
                 null // required to indicate no more input
         };

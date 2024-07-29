@@ -14,16 +14,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.gui.windows.AskOptionWindow;
 import org.brayancaro.gui.windows.AskSaveStatsWindow;
 import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
 import org.brayancaro.gui.windows.GameWindow;
-import org.brayancaro.prompts.Prompt;
 import org.brayancaro.records.menu.Configuration;
 
 import com.googlecode.lanterna.TextColor;
@@ -135,37 +134,28 @@ public class Menu {
     }
 
     private void executeSaveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
-        if (askShouldSaveGame()) {
-            saveGame(tableroDelUsuario);
+        var name = askShouldSaveGame();
+        if (name.isPresent()) {
+            saveGame(name.get(), tableroDelUsuario);
         }
     }
 
-    private void saveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
-        var username = new Prompt()
-                .scanner(scanner)
-                .title("¿Cual es tu nombre? ")
-                .printTitleUsing(System.out::print)
-                .ask()
-                .toLowerCase()
-                .trim();
-
-        grabar(tableroDelUsuario, username);
+    private void saveGame(String name, TableroPersonalizado tableroDelUsuario) throws IOException {
+        grabar(tableroDelUsuario, name);
 
         guardarDatos();
 
-        System.out.println("¡Listo!, tu partida se ha guardado");
-        System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
-
-        scanner.nextLine();
-        for (int i = 0; i < 45; i++) {
-            System.out.println();
-        }
+        new MessageDialogBuilder()
+            .setTitle("¡Listo!")
+            .setText("Tu partida se ha guardado")
+            .build()
+            .showDialog(gui);
     }
 
-    private boolean askShouldSaveGame() {
+    private Optional<String> askShouldSaveGame() {
         var window = new AskSaveStatsWindow();
         gui.addWindowAndWait(window);
-        return window.canSaveStats();
+        return window.getName();
     }
 
     protected Option askOption() {
