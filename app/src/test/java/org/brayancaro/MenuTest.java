@@ -105,6 +105,7 @@ class MenuTest {
                                         getFinishGameModalKeyStrokes(),
                                         getSaveStatsKeyStrokes(),
                                         getViewStartsKeyStrokes(),
+                                        getExitStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         """
@@ -120,7 +121,6 @@ class MenuTest {
                                         getToggleFlagKeyStrokes(),
                                         getClickFirstCellKeyStrokes(),
                                         getFinishGameModalKeyStrokes(),
-                                        getDontSaveStatsKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
                         ""),
@@ -153,9 +153,19 @@ class MenuTest {
                                 "try see stats (that isn't present) without exceptions",
                                 new KeyStroke[][] {
                                         getViewStartsKeyStrokes(),
+                                        getConfirmStartGameKeyStrokes(),
                                         getSimulateExitKeyStrokes(),
                                 }),
-                        ""));
+                        "")
+                    );
+    }
+
+    private static KeyStroke[] getExitStatsKeyStrokes() {
+        return new KeyStroke[] {
+            new KeyStroke(KeyType.Tab),
+            new KeyStroke(KeyType.Enter),
+            null,
+        };
     }
 
     private static KeyStroke[] getBoardConfigKeyStrokes() {
