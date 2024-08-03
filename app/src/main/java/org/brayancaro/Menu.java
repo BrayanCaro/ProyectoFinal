@@ -16,7 +16,6 @@ import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Scanner;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.gui.windows.AskOptionWindow;
