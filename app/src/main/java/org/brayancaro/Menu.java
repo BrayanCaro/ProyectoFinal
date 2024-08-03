@@ -14,16 +14,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.Random;
-import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import org.brayancaro.enums.menu.Option;
 import org.brayancaro.gui.windows.AskOptionWindow;
 import org.brayancaro.gui.windows.AskSaveStatsWindow;
 import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
 import org.brayancaro.gui.windows.GameWindow;
-import org.brayancaro.prompts.Prompt;
+import org.brayancaro.gui.windows.ListGamesWindow;
 import org.brayancaro.records.menu.Configuration;
 
 import com.googlecode.lanterna.TextColor;
@@ -39,8 +38,6 @@ public class Menu {
 
     private static String[][] datos = new String[20][4];
 
-    protected Scanner scanner;
-
     protected Random random;
 
     private Screen screen;
@@ -51,11 +48,9 @@ public class Menu {
         var defaultTerminalFactory = new DefaultTerminalFactory();
 
         try (var terminal = defaultTerminalFactory.createTerminal();
-                var screen = new TerminalScreen(terminal);
-                var scanner = new Scanner(System.in)) {
+                var screen = new TerminalScreen(terminal)) {
 
             (new Menu())
-                    .setScanner(scanner)
                     .random(new SecureRandom())
                     .screen(screen)
                     .play();
@@ -83,21 +78,7 @@ public class Menu {
     public void realizarAccion(Option option) throws Exception {
         switch (option) {
             case Option.START -> startGame();
-            case Option.SHOW_HISTORY -> {
-                try {
-                    tabla(cargarDatosDeUnArchivo());
-                    System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
-                    scanner.nextLine();
-                    for (int i = 0; i < 45; i++) {
-                        System.out.println();
-                    }
-                } catch (FileNotFoundException e) {
-                    System.out.println(
-                            """
-                                    ¡Ups!, parece que no has jugado una partida.
-                                    Pero si ya jugaste asegurate de que el archivo "listaDeTablas.minas" esta en la misma carpeta.""");
-                }
-            }
+            case Option.SHOW_HISTORY -> showHistory();
             case Option.DELETE_HISTORY -> {
                 try {
                     borrarDatos();
@@ -123,6 +104,19 @@ public class Menu {
         handleWinningState(board);
     }
 
+    private void showHistory() throws ClassNotFoundException, IOException {
+        try {
+            gui.addWindowAndWait(new ListGamesWindow(cargarDatosDeUnArchivo()));
+        } catch (FileNotFoundException e) {
+            new MessageDialogBuilder()
+                    .setTitle("¡Ups!, parece que no has jugado una partida.")
+                    .setText(
+                            "Pero si ya jugaste asegurate de que el archivo \"listaDeTablas.minas\" esta en la misma carpeta.")
+                    .build()
+                    .showDialog(gui);
+        }
+    }
+
     private void handleWinningState(TableroPersonalizado board) throws IOException {
         if (board.jugadorGanoSinMarcas() == board.getConfiguration().bombCount()) {
             new MessageDialogBuilder()
@@ -135,37 +129,28 @@ public class Menu {
     }
 
     private void executeSaveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
-        if (askShouldSaveGame()) {
-            saveGame(tableroDelUsuario);
+        var name = askShouldSaveGame();
+        if (name.isPresent()) {
+            saveGame(name.get(), tableroDelUsuario);
         }
     }
 
-    private void saveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
-        var username = new Prompt()
-                .scanner(scanner)
-                .title("¿Cual es tu nombre? ")
-                .printTitleUsing(System.out::print)
-                .ask()
-                .toLowerCase()
-                .trim();
-
-        grabar(tableroDelUsuario, username);
+    private void saveGame(String name, TableroPersonalizado tableroDelUsuario) throws IOException {
+        grabar(tableroDelUsuario, name);
 
         guardarDatos();
 
-        System.out.println("¡Listo!, tu partida se ha guardado");
-        System.out.print("(Presiona la tecla \"↵\" para salir al menu)");
-
-        scanner.nextLine();
-        for (int i = 0; i < 45; i++) {
-            System.out.println();
-        }
+        new MessageDialogBuilder()
+                .setTitle("¡Listo!")
+                .setText("Tu partida se ha guardado")
+                .build()
+                .showDialog(gui);
     }
 
-    private boolean askShouldSaveGame() {
+    private Optional<String> askShouldSaveGame() {
         var window = new AskSaveStatsWindow();
         gui.addWindowAndWait(window);
-        return window.canSaveStats();
+        return window.getName();
     }
 
     protected Option askOption() {
@@ -239,47 +224,6 @@ public class Menu {
         }
     }
 
-    /**
-     * Metodo que imprime el menu
-     *
-     * @param arreglo -- Indica el arreglo de arreglos de Strings que va a imprimir
-     */
-    public static void tabla(String[][] arreglo) {
-        if (arreglo[0][0] == null) {
-            throw new IllegalArgumentException();
-        }
-        for (int i = 0; i < 45; i++) {
-            System.out.println();
-        }
-        for (int i = 0; i < 45; i++) {
-            System.out.print("=");
-        }
-        System.out.print("\n");
-        System.out.print("| Nombre | Dimension | No.Bombas |  Tiempo  |\n");
-        for (int i = 0; i < 45; i++) {
-            System.out.print("=");
-        }
-        System.out.print("\n");
-        for (int i = 0; i < arreglo.length; i++) {
-            if (arreglo[i][0] != null) {
-                System.out.print(
-                        "| " +
-                                arreglo[i][0].concat("      ").substring(0, 6) +
-                                " |   " +
-                                arreglo[i][1].concat("   ").substring(0, 6) +
-                                "  |    " +
-                                arreglo[i][2].concat("  ").substring(0, 3) +
-                                "    | " +
-                                arreglo[i][3] +
-                                " |\n");
-            }
-        }
-        for (int i = 0; i < 45; i++) {
-            System.out.print("=");
-        }
-        System.out.print("\n");
-    }
-
     public static void grabar(
             TableroPersonalizado tablero,
             String nombre) {
@@ -318,12 +262,6 @@ public class Menu {
                 TextColor.ANSI.WHITE_BRIGHT,
                 TextColor.ANSI.BLACK_BRIGHT,
                 TextColor.ANSI.BLACK));
-
-        return this;
-    }
-
-    public Menu setScanner(Scanner scanner) {
-        this.scanner = scanner;
 
         return this;
     }
