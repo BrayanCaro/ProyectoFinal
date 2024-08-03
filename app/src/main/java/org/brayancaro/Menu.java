@@ -44,9 +44,9 @@ public class Menu {
 
     protected Random random;
 
-    private Screen screen;
+    protected Screen screen;
 
-    private MultiWindowTextGUI gui;
+    protected MultiWindowTextGUI gui;
 
     public static void main(String[] args) throws Exception {
         var defaultTerminalFactory = new DefaultTerminalFactory();
@@ -180,8 +180,8 @@ public class Menu {
     protected void deleteGameStats() {
 
         var messageBuilder = new MessageDialogBuilder()
-                .setTitle("Acción no requerida")
-                .setText("No hay archivos a borrar");
+                .setTitle("Archivos eliminados")
+                .setText("");
 
         try {
             deleteGameStatsFile();
