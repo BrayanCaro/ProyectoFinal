@@ -6,6 +6,10 @@
  */
 package org.brayancaro;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.NoSuchFileException;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -79,14 +83,7 @@ public class Menu {
         switch (option) {
             case Option.START -> startGame();
             case Option.SHOW_HISTORY -> showHistory();
-            case Option.DELETE_HISTORY -> {
-                try {
-                    borrarDatos();
-                    System.out.println("Listo!, datos borrados\n");
-                } catch (NullPointerException e) {
-                    System.out.println("No hay nada que borrar\n");
-                }
-            }
+            case Option.DELETE_HISTORY -> deleteGameStats();
             case Option.QUIT -> System.out.println("Adios 👋");
         }
     }
@@ -181,33 +178,28 @@ public class Menu {
         }
     }
 
-    /**
-     * Metodo para guardar una partida
-     *
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que centendra la
-     *                         partida
-     * @throws FileNotFoundException -- Si el archio no es encontrado
-     * @throws RuntimeException      -- Si el archivo no puede ser leido, o si el
-     *                               archivo no puede ser escrito
-     */
-    public static void borrarDatos() throws IOException, NullPointerException {
-        if (datos[0][0] == null) {
-            throw new NullPointerException();
-        }
-        String[][] listaVacia = datos;
-        for (int i = 0; i < 20; i++) {
-            if (datos[i][0] != null) {
-                listaVacia[i][0] = null;
-                listaVacia[i][1] = null;
-                listaVacia[i][2] = null;
-                listaVacia[i][3] = null;
-            }
-        }
+    protected void deleteGameStats() {
 
-        try (var guardarTabla = new ObjectOutputStream(
-                new FileOutputStream(SAVED_FILE_PATH))) {
-            guardarTabla.writeObject(listaVacia);
+        var messageBuilder = new MessageDialogBuilder()
+                .setTitle("Acción no requerida")
+                .setText("No hay archivos a borrar");
+
+        try {
+            deleteGameStatsFile();
+        } catch (NoSuchFileException e) {
+            messageBuilder
+                    .setTitle("Acción no requerida")
+                    .setText("No hay archivos a borrar");
+        } catch (IOException e) {
+            messageBuilder.setTitle("Error")
+                    .setText("Hubo un error al borrar los archivos");
+        } finally {
+            messageBuilder.build().showDialog(gui);
         }
+    }
+
+    protected void deleteGameStatsFile() throws IOException {
+        Files.delete(Paths.get(SAVED_FILE_PATH));
     }
 
     /**

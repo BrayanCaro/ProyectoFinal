@@ -132,6 +132,7 @@ class MenuTest {
                         "try delete stats (that isn't present) without exceptions",
                         new KeyStroke[][] {
                                 getDeleteStatsKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
                                 getSimulateExitKeyStrokes(),
                         }),
                 Named.named(
