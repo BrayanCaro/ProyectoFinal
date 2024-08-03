@@ -64,9 +64,7 @@ public class Menu {
         Option option = null;
         do {
             option = askOption();
-            if (option instanceof Option) {
-                realizarAccion(option);
-            }
+            realizarAccion(option);
         } while (option != Option.QUIT);
 
         screen.stopScreen();
@@ -87,7 +85,8 @@ public class Menu {
                     System.out.println("No hay nada que borrar\n");
                 }
             }
-            case Option.QUIT -> System.out.println("Adios 👋");
+            case Option.QUIT -> {/* do nothing, because the user is going to quit the app */}
+            case null -> {/* do nothing, the option is invalid */}
         }
     }
 
