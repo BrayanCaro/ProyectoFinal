@@ -68,9 +68,7 @@ public class Menu {
         Option option = null;
         do {
             option = askOption();
-            if (option instanceof Option) {
-                realizarAccion(option);
-            }
+            realizarAccion(option);
         } while (option != Option.QUIT);
 
         screen.stopScreen();
@@ -84,7 +82,8 @@ public class Menu {
             case Option.START -> startGame();
             case Option.SHOW_HISTORY -> showHistory();
             case Option.DELETE_HISTORY -> deleteGameStats();
-            case Option.QUIT -> System.out.println("Adios 👋");
+            case Option.QUIT -> {/* do nothing, because the user is going to quit the app */}
+            case null -> {/* do nothing, the option is invalid */}
         }
     }
 
