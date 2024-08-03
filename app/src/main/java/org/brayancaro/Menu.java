@@ -39,8 +39,6 @@ public class Menu {
 
     private static String[][] datos = new String[20][4];
 
-    protected Scanner scanner;
-
     protected Random random;
 
     private Screen screen;
@@ -51,11 +49,9 @@ public class Menu {
         var defaultTerminalFactory = new DefaultTerminalFactory();
 
         try (var terminal = defaultTerminalFactory.createTerminal();
-                var screen = new TerminalScreen(terminal);
-                var scanner = new Scanner(System.in)) {
+                var screen = new TerminalScreen(terminal)) {
 
             (new Menu())
-                    .setScanner(scanner)
                     .random(new SecureRandom())
                     .screen(screen)
                     .play();
@@ -267,12 +263,6 @@ public class Menu {
                 TextColor.ANSI.WHITE_BRIGHT,
                 TextColor.ANSI.BLACK_BRIGHT,
                 TextColor.ANSI.BLACK));
-
-        return this;
-    }
-
-    public Menu setScanner(Scanner scanner) {
-        this.scanner = scanner;
 
         return this;
     }

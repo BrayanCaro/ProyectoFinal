@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -53,7 +51,7 @@ class MenuTest {
     @ParameterizedTest
     @MethodSource
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void playerCanWinAGame(KeyStroke[][] groupKeyStrokes, String scannerSource) {
+    void playerCanWinAGame(KeyStroke[][] groupKeyStrokes) {
         var keyStrokesIterator = Stream.of(groupKeyStrokes)
                 .flatMap(Stream::of)
                 .iterator();
@@ -77,94 +75,79 @@ class MenuTest {
                     }
                 });
 
-        assertDoesNotThrow(() -> menu.setScanner(new Scanner(scannerSource)).play());
+        assertDoesNotThrow(() -> menu.play());
     }
 
-    static Stream<Arguments> playerCanWinAGame() {
+    static Stream<Named<KeyStroke[][]>> playerCanWinAGame() {
         return Stream.of(
-                Arguments.arguments(
-                        Named.named("start a game, win, and quit",
-                                new KeyStroke[][] {
-                                        getStartGameKeyStrokes(),
-                                        getBoardConfigKeyStrokes(),
-                                        getConfirmStartGameKeyStrokes(),
-                                        getClickFirstCellKeyStrokes(),
-                                        getFinishGameModalKeyStrokes(),
-                                        getDontSaveStatsKeyStrokes(),
-                                        getSimulateExitKeyStrokes(),
-                                }),
-                        ""),
-                Arguments.arguments(
-                        Named.named("start, play, reveal cell, see stats and quit",
-                                new KeyStroke[][] {
-                                        getStartGameKeyStrokes(),
-                                        getBoardConfigKeyStrokes(),
-                                        getViewStartsKeyStrokes(),
-                                        getConfirmStartGameKeyStrokes(),
-                                        getClickFirstCellKeyStrokes(),
-                                        getFinishGameModalKeyStrokes(),
-                                        getSaveStatsKeyStrokes(),
-                                        getViewStartsKeyStrokes(),
-                                        getExitStatsKeyStrokes(),
-                                        getSimulateExitKeyStrokes(),
-                                }),
-                        """
-                        <white-space>
-                        """),
-                Arguments.arguments(
-                        Named.named(
-                                "start, play, mark cell, reveal cell and quit",
-                                new KeyStroke[][] {
-                                        getStartGameKeyStrokes(),
-                                        getBoardConfigFullKeyStrokes(),
-                                        getConfirmStartGameKeyStrokes(),
-                                        getToggleFlagKeyStrokes(),
-                                        getClickFirstCellKeyStrokes(),
-                                        getFinishGameModalKeyStrokes(),
-                                        getSimulateExitKeyStrokes(),
-                                }),
-                        ""),
-                Arguments.arguments(
-                        Named.named(
-                                "start, play, toggle mark cell, reveal cell and quit",
-                                new KeyStroke[][] {
-                                        getStartGameKeyStrokes(),
-                                        getBoardConfigKeyStrokes(),
-                                        getConfirmStartGameKeyStrokes(),
-                                        getToggleFlagKeyStrokes(),
-                                        getToggleFlagKeyStrokes(),
-                                        getClickFirstCellKeyStrokes(),
-                                        getFinishGameModalKeyStrokes(),
-                                        getDeleteStatsKeyStrokes(),
-                                        getSaveStatsKeyStrokes(),
-                                        getSimulateExitKeyStrokes(),
-                                }),
-                        ""),
-                Arguments.arguments(
-                        Named.named(
-                                "try delete stats (that isn't present) without exceptions",
-                                new KeyStroke[][] {
-                                        getDeleteStatsKeyStrokes(),
-                                        getSimulateExitKeyStrokes(),
-                                }),
-                        ""),
-                Arguments.arguments(
-                        Named.named(
-                                "try see stats (that isn't present) without exceptions",
-                                new KeyStroke[][] {
-                                        getViewStartsKeyStrokes(),
-                                        getConfirmStartGameKeyStrokes(),
-                                        getSimulateExitKeyStrokes(),
-                                }),
-                        "")
-                    );
+                Named.named("start a game, win, and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getDontSaveStatsKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named("start, play, reveal cell, see stats and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigKeyStrokes(),
+                                getViewStartsKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getSaveStatsKeyStrokes(),
+                                getViewStartsKeyStrokes(),
+                                getExitStatsKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "start, play, mark cell, reveal cell and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigFullKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getToggleFlagKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "start, play, toggle mark cell, reveal cell and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getToggleFlagKeyStrokes(),
+                                getToggleFlagKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getDeleteStatsKeyStrokes(),
+                                getSaveStatsKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "try delete stats (that isn't present) without exceptions",
+                        new KeyStroke[][] {
+                                getDeleteStatsKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "try see stats (that isn't present) without exceptions",
+                        new KeyStroke[][] {
+                                getViewStartsKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }));
     }
 
     private static KeyStroke[] getExitStatsKeyStrokes() {
         return new KeyStroke[] {
-            new KeyStroke(KeyType.Tab),
-            new KeyStroke(KeyType.Enter),
-            null,
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null,
         };
     }
 
