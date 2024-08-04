@@ -17,13 +17,13 @@ public abstract class Tablero implements Serializable {
     protected Random random;
 
     /**
-     * Metodo para calcular un numero aleatorio entre un intervalo maximo (dado por el parametro) y el 0
-     * @param valorMaximo -- El valor maximo del intervalo
-     * @return int -- El numero aleatorio
+     * Random unsigned integer between 0 and bound (exclusive)
+     * @param int bound Exclusive
      */
-    public int numeroEnteroAleatorio(int valorMaximo) {
-        return random.nextInt(0, valorMaximo + 1);
+    protected int randomUnsignedInt(int bound) {
+        return random.nextInt(0, bound);
     }
+
 
     public Tablero random(Random random) {
         this.random = random;
