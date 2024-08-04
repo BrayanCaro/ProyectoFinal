@@ -213,22 +213,6 @@ public class TableroPersonalizado extends Tablero {
     }
 
     /**
-     * Metodo para preparar a guardar los datos de una partida
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que contiene las partidas
-     */
-    public String dimension() {
-        return celdas.length + "×" + celdas[0].length;
-    }
-
-    /**
-     * Metodo que evalua el tablero y determina si el jugador ya hago
-     * @return boolean -- Regresa falso y el jugador no ha ganado, true si el jugador ya gano
-     */
-    public boolean elJugadorYaGano() {
-        return true;
-    }
-
-    /**
      * Metodo que dice cuantas celdas hay sin ver (es utilizado para determinar si un jugador gana anque no marca nada)
      * @return int -- Dice la cantidad de casillas que faltan por descubrir
      */

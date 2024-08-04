@@ -6,18 +6,17 @@
  */
 package org.brayancaro;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.NoSuchFileException;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
 
@@ -27,6 +26,7 @@ import org.brayancaro.gui.windows.AskSaveStatsWindow;
 import org.brayancaro.gui.windows.AskUnsignedIntegerWindow;
 import org.brayancaro.gui.windows.GameWindow;
 import org.brayancaro.gui.windows.ListGamesWindow;
+import org.brayancaro.records.board.GameStat;
 import org.brayancaro.records.menu.Configuration;
 
 import com.googlecode.lanterna.TextColor;
@@ -40,15 +40,13 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 public class Menu {
     public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
 
-    private static String[][] datos = new String[20][4];
-
     protected Random random;
 
     protected Screen screen;
 
     protected MultiWindowTextGUI gui;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException {
         var defaultTerminalFactory = new DefaultTerminalFactory();
 
         try (var terminal = defaultTerminalFactory.createTerminal();
@@ -62,7 +60,7 @@ public class Menu {
 
     }
 
-    public void play() throws Exception {
+    public void play() throws IOException {
         screen.startScreen();
 
         Option option = null;
@@ -77,7 +75,7 @@ public class Menu {
     /*
      * Metodo que realiza una accion de acuerdo a las dichas en el metodo menu.
      */
-    public void realizarAccion(Option option) throws Exception {
+    public void realizarAccion(Option option) {
         switch (option) {
             case Option.START -> startGame();
             case Option.SHOW_HISTORY -> showHistory();
@@ -87,7 +85,7 @@ public class Menu {
         }
     }
 
-    private void startGame() throws IOException {
+    private void startGame() {
         var config = askConfiguration();
         var board = new TableroPersonalizado(config, random);
         new MessageDialogBuilder()
@@ -124,7 +122,7 @@ public class Menu {
         }
     }
 
-    private void handleWinningState(TableroPersonalizado board) throws IOException {
+    private void handleWinningState(TableroPersonalizado board) {
         if (board.jugadorGanoSinMarcas() == board.getConfiguration().bombCount()) {
             new MessageDialogBuilder()
                     .setTitle("GANASTE")
@@ -135,23 +133,28 @@ public class Menu {
         }
     }
 
-    private void executeSaveGame(TableroPersonalizado tableroDelUsuario) throws IOException {
+    private void executeSaveGame(TableroPersonalizado tableroDelUsuario) {
         var name = askShouldSaveGame();
         if (name.isPresent()) {
-            saveGame(name.get(), tableroDelUsuario);
+            saveGame(new GameStat(name.get(), tableroDelUsuario.configuration, tableroDelUsuario.getEndedAt()));
         }
     }
 
-    private void saveGame(String name, TableroPersonalizado tableroDelUsuario) throws IOException {
-        grabar(tableroDelUsuario, name);
+    private void saveGame(GameStat gameStat) {
+        var message = new MessageDialogBuilder()
+            .setTitle("¡Listo!")
+            .setText("Tu partida se ha guardado");
 
-        guardarDatos();
-
-        new MessageDialogBuilder()
-                .setTitle("¡Listo!")
-                .setText("Tu partida se ha guardado")
+        try {
+            saveGameStatsIntoFile(gameStat);
+        } catch (IOException e) {
+            message.setTitle("Hubo un error al guardar la partica")
+                .setText("");
+        } finally {
+            message
                 .build()
                 .showDialog(gui);
+        }
     }
 
     private Optional<String> askShouldSaveGame() {
@@ -172,19 +175,14 @@ public class Menu {
         return askConfigWindow.getConfiguration();
     }
 
-    /**
-     * Metodo para guardar una partida
-     *
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que centendra la
-     *                         partida
-     * @throws FileNotFoundException -- Si el archio no es encontrado
-     * @throws RuntimeException      -- Si el archivo no puede ser leido, o si el
-     *                               archivo no puede ser escrito
-     */
-    public static void guardarDatos() throws IOException {
-        try (var guardarTabla = new ObjectOutputStream(
+    protected void saveGameStatsIntoFile(GameStat gameStat) throws IOException {
+        var previousStats = safeLoadStats();
+        var stats = Arrays.copyOf(previousStats, previousStats.length + 1);
+        stats[previousStats.length] = gameStat;
+
+        try (var outputStream = new ObjectOutputStream(
                 new FileOutputStream(SAVED_FILE_PATH))) {
-            guardarTabla.writeObject(Menu.datos);
+            outputStream.writeObject(stats);
         }
     }
 
@@ -212,34 +210,21 @@ public class Menu {
         Files.delete(Paths.get(SAVED_FILE_PATH));
     }
 
-    protected String[][] loadStats() throws IOException, ClassNotFoundException {
-        try (var stream = new ObjectInputStream(
-                new FileInputStream(SAVED_FILE_PATH))) {
-            Menu.datos = (String[][]) stream.readObject();
-            return Menu.datos;
+    protected GameStat[] loadStats() throws IOException, ClassNotFoundException {
+        try (var fis = new FileInputStream(SAVED_FILE_PATH);
+                var stream = new ObjectInputStream(fis)) {
+            return (GameStat[]) stream.readObject();
         }
     }
 
-    public static void grabar(
-            TableroPersonalizado tablero,
-            String nombre) {
-        if (datos[19][0] != null) {
-            throw new IllegalArgumentException("El tablero esta lleno");
+    protected GameStat[] safeLoadStats() {
+        try {
+            return loadStats();
+        } catch (ClassNotFoundException | IOException e) {
+            return new GameStat[0];
         }
-        int i = 0;
-        boolean aux = false;
-        do {
-            if (datos[i][0] == null) {
-                datos[i][0] = nombre;
-                datos[i][1] = tablero.dimension();
-                datos[i][2] = tablero.getConfiguration().bombCount() + "";
-                datos[i][3] = tablero.getEndedAt().format(DateTimeFormatter.RFC_1123_DATE_TIME);
-                aux = true;
-            } else {
-                i++;
-            }
-        } while (i < 20 && !aux);
     }
+
 
     public Menu random(Random random) {
         this.random = random;
