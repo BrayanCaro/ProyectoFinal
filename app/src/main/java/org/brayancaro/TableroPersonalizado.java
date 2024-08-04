@@ -75,54 +75,48 @@ public class TableroPersonalizado extends Tablero {
 
     /**
      * Metodo para revelar una o mas casillas segun sea el caso
-     * @param cordenadaX -- Hace referencia a la posicion que queremos revelar en el eje x
-     * @param cordenadaY -- Hace referencia a la posicion que queremos revelar en el eje y
      */
-    public void elegirCelda(int cordenadaX, int cordenadaY)
-        throws Exception, IndexOutOfBoundsException, IllegalAccessException, TocasteUnaBombaExcepcion {
-        if (cordenadaX < 0 || cordenadaY < 0) {
+    public void revealCell(Coordinate coordinate) throws IndexOutOfBoundsException, IllegalAccessException, TocasteUnaBombaExcepcion {
+        var x = coordinate.x();
+        var y = coordinate.y();
+
+        if (x < 0 || y < 0) {
             throw new IndexOutOfBoundsException(
                 "El tablero no puede tener cordenadas negativas"
             );
         }
 
-        if (cordenadaX >= celdas.length || cordenadaY >= celdas[0].length) {
+        if (x >= celdas.length || y >= celdas[0].length) {
             throw new IndexOutOfBoundsException(
                 "El tablero no puede tener cordenadas tan grandes"
             );
         }
 
-        if (celdas[cordenadaX][cordenadaY].haSidoVista()) {
+        var cell = getCell(coordinate);
+
+        if (cell.haSidoVista()) {
             return;
         }
 
-        if (celdas[cordenadaX][cordenadaY].obtenerEstaEstaMarcada()) {
+        if (cell.obtenerEstaEstaMarcada()) {
             throw new IllegalAccessException(
                 "No puedes ver una mina si ya la marcaste, para hacer eso vuelve a marcar la celda"
             );
         }
 
-        var coordinate = new Coordinate(cordenadaX, cordenadaY);
+        cell.verCelda();
 
-        celdas[cordenadaX][cordenadaY].verCelda();
-
-        if (!celdas[cordenadaX][cordenadaY].obtenerEstaCeldaTieneUnaBomba()) {
-            if (
-                celdas[cordenadaX][cordenadaY].obtenerBombasAlRededorDeEstaCelda() ==
-                0
-            ) {
+        if (!cell.obtenerEstaCeldaTieneUnaBomba()) {
+            if (cell.obtenerBombasAlRededorDeEstaCelda() == 0) {
                 visitCellsWihoutBombs(coordinate);
             }
         } else {
             endGame();
-            celdas[cordenadaX][cordenadaY].explotar();
+            cell.explotar();
             throw new TocasteUnaBombaExcepcion("Perdiste :(");
         }
     }
 
-    public void elegirCelda(Coordinate coordinate) throws IndexOutOfBoundsException, IllegalAccessException, TocasteUnaBombaExcepcion, Exception {
-        elegirCelda(coordinate.x(), coordinate.y());
-    }
 
     /**
      * Metodo para mostrar todas las bombas si un jugador pierde
@@ -243,13 +237,11 @@ public class TableroPersonalizado extends Tablero {
         }
     }
 
-    /**
-     * TODO improve error handling
-     */
-    public void execute(Coordinate coordinate, State state) throws Exception {
-        switch (state) {
-            case MARKED  -> marcarCelda(coordinate);
-            case REVEALED -> elegirCelda(coordinate);
+    public void execute(Coordinate coordinate, State state) throws IndexOutOfBoundsException, IllegalAccessException, TocasteUnaBombaExcepcion {
+        if (state == State.MARKED) {
+            marcarCelda(coordinate);
+        } else if (state == State.REVEALED) {
+            revealCell(coordinate);
         }
     }
 
