@@ -3,13 +3,24 @@
  */
 package org.brayancaro;
 
+import java.io.IOException;
+import java.security.SecureRandom;
+
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+
 public class App {
+    public static void main(String[] args) throws IOException {
+        var defaultTerminalFactory = new DefaultTerminalFactory();
 
-    public String getGreeting() {
-        return "Hello World!";
-    }
+        try (var terminal = defaultTerminalFactory.createTerminal();
+                var screen = new TerminalScreen(terminal)) {
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+            (new Menu())
+                    .random(new SecureRandom())
+                    .screen(screen)
+                    .play();
+        }
+
     }
 }
