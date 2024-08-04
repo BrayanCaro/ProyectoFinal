@@ -50,26 +50,19 @@ public class TableroPersonalizado extends Tablero {
             }
         }
 
-        for (int i = 0; i < configuration.bombCount(); i++) {
-            int numeroAleratorioFilas = super.numeroEnteroAleatorio(
-                this.celdas.length - 1
-            );
-            int numeroAleratorioColumnas = super.numeroEnteroAleatorio(
-                this.celdas[0].length - 1
-            );
+        var bombCount = 0;
+        while (bombCount < configuration.bombCount()) {
+            var randomCoordinate = randomCoordinate();
+            var cell = getCell(randomCoordinate);
 
-            var coordinate = new Coordinate(numeroAleratorioFilas, numeroAleratorioColumnas);
-
-            if (
-                !celdas[numeroAleratorioFilas][numeroAleratorioColumnas].obtenerEstaCeldaTieneUnaBomba()
-            ) {
-                celdas[numeroAleratorioFilas][numeroAleratorioColumnas].ponerBomba();
-                setupBombCountForNeigbours(coordinate);
-            } else {
-                if (i <= (celdas.length + 1) * (celdas[0].length + 1)) {
-                    i--;
-                }
+            if (cell.obtenerEstaCeldaTieneUnaBomba()) {
+                continue;
             }
+
+            cell.ponerBomba();
+            setupBombCountForNeigbours(randomCoordinate);
+
+            bombCount++;
         }
     }
 
@@ -261,6 +254,12 @@ public class TableroPersonalizado extends Tablero {
         }
 
         return coordinates;
+    }
+
+    protected Coordinate randomCoordinate() {
+        var x = randomUnsignedInt(configuration.rows());
+        var y = randomUnsignedInt(configuration.columns());
+        return new Coordinate(x, y);
     }
 
     public ZonedDateTime getEndedAt() {
