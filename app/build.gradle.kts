@@ -8,6 +8,8 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     application
+    jacoco
+    alias(libs.plugins.sonarqube)
 }
 
 repositories {
@@ -18,11 +20,15 @@ repositories {
 dependencies {
     // Use JUnit test framework.
     testImplementation(libs.junit)
+    testImplementation(libs.junitParams)
+    testImplementation(libs.mockito)
+
+    testRuntimeOnly(libs.junitEngine)
 
     // This dependency is used by the application.
     implementation(libs.guava)
-
     implementation(libs.hibernate.validator)
+    implementation(libs.lanterna)
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -30,9 +36,29 @@ java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
 application {
     // Define the main class for the application.
-    mainClass = "org.brayancaro.Menu"
+    mainClass = "org.brayancaro.App"
 }
 
 tasks.getByName("run", JavaExec::class) {
  standardInput = System.`in`
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+
+    reports {
+      xml.required = true
+    }
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "BrayanCaro_ProyectoFinal")
+    property("sonar.organization", "brayancaro")
+    property("sonar.host.url", "https://sonarcloud.io")
+  }
 }

@@ -118,7 +118,7 @@ public class Celdas implements Serializable {
             } else if (bombasAlRededorDeEstaCelda == 0) {
                 return "  ";
             } else {
-                return " " + String.valueOf(bombasAlRededorDeEstaCelda);
+                return " " + bombasAlRededorDeEstaCelda;
             }
         } else if (ganador) {
             return "🏆";

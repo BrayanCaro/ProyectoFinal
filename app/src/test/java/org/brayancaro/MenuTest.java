@@ -3,22 +3,279 @@
  */
 package org.brayancaro;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.util.Scanner;
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.brayancaro.gui.components.MinesweeperButton;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
-public class MenuTest {
+import com.googlecode.lanterna.TerminalSize;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.IOSafeTerminal;
 
-    @Test
-    public void menuFailsWithInvalidInput() {
-        var classUnderTest = new Menu()
-            .setScanner(new Scanner("foo"));
+class MenuTest {
+    private Menu menu;
 
-        assertThrows(
-            Exception.class,
-                () -> classUnderTest.play()
-        );
+    private IOSafeTerminal terminal;
+
+    private boolean hasConsumeAllKeyStrokes = false;
+
+    @BeforeEach
+    public void init() throws IOException {
+        new File(Menu.SAVED_FILE_PATH).delete();
+
+        terminal = Mockito.mock(IOSafeTerminal.class);
+
+        Mockito.when(terminal.getTerminalSize()).thenReturn(TerminalSize.ONE);
+
+        var screen = new TerminalScreen(terminal);
+        menu = new Menu()
+                .random(new Random(120))
+                .screen(screen);
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    void playerCanWinAGame(KeyStroke[][] groupKeyStrokes) {
+        var keyStrokesIterator = Stream.of(groupKeyStrokes)
+                .flatMap(Stream::of)
+                .iterator();
+
+        Mockito.when(terminal.pollInput()).then(
+                new Answer<KeyStroke>() {
+                    @Override
+                    public KeyStroke answer(InvocationOnMock invocation) {
+                        if (hasConsumeAllKeyStrokes) {
+                            throw new RuntimeException("All the keys storkes have been consumed");
+                        }
+
+                        if (keyStrokesIterator.hasNext()) {
+                            return keyStrokesIterator.next();
+                        } else {
+                            // skip flush when closing the screen
+                            // https://github.com/mabe02/lanterna/blob/5b839cc52ccfff7ba56a7da40a753037af802893/src/main/java/com/googlecode/lanterna/screen/TerminalScreen.java#L120-L127
+                            hasConsumeAllKeyStrokes = true;
+                            return new KeyStroke(KeyType.EOF);
+                        }
+                    }
+                });
+
+        assertDoesNotThrow(() -> menu.play());
+    }
+
+    static Stream<Named<KeyStroke[][]>> playerCanWinAGame() {
+        return Stream.of(
+                Named.named("start a game, win, and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getDontSaveStatsKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named("start, play, reveal cell, see stats and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigKeyStrokes(),
+                                getViewStartsKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getSaveStatsKeyStrokes(),
+                                getViewStartsKeyStrokes(),
+                                getExitStatsKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "start, play, mark cell, reveal cell and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigFullKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getToggleFlagKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "start, play, toggle mark cell, reveal cell and quit",
+                        new KeyStroke[][] {
+                                getStartGameKeyStrokes(),
+                                getBoardConfigKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getToggleFlagKeyStrokes(),
+                                getToggleFlagKeyStrokes(),
+                                getClickFirstCellKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getDeleteStatsKeyStrokes(),
+                                getSaveStatsKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "try delete stats (that isn't present) without exceptions",
+                        new KeyStroke[][] {
+                                getDeleteStatsKeyStrokes(),
+                                getFinishGameModalKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }),
+                Named.named(
+                        "try see stats (that isn't present) without exceptions",
+                        new KeyStroke[][] {
+                                getViewStartsKeyStrokes(),
+                                getConfirmStartGameKeyStrokes(),
+                                getSimulateExitKeyStrokes(),
+                        }));
+    }
+
+    private static KeyStroke[] getExitStatsKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getBoardConfigKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('1'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getConfirmStartGameKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getToggleFlagKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(MinesweeperButton.MARK_CELL_CHARACTER, false, false),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getFinishGameModalKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getClickFirstCellKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getBoardConfigFullKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('8'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(Character.valueOf('6'), false, false),
+                new KeyStroke(Character.valueOf('3'), false, false),
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getDeleteStatsKeyStrokes() {
+        return new KeyStroke[] {
+                // erase data
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null,
+        };
+    }
+
+    private static KeyStroke[] getViewStartsKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        };
+    }
+
+    /**
+     * Mock user keys: press first option to start a game and then submit
+     */
+    private static KeyStroke[] getStartGameKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        };
+    }
+
+    private static KeyStroke[] getSimulateExitKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.ArrowDown), // focus 2nd option
+                new KeyStroke(KeyType.ArrowDown), // focus 3rd option
+                new KeyStroke(KeyType.ArrowDown), // focus 4rd option
+                new KeyStroke(KeyType.Enter), // select
+                new KeyStroke(KeyType.Tab), // submit
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
+        };
+    }
+
+    private static KeyStroke[] getDontSaveStatsKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.ArrowDown),
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        };
+    }
+
+    private static KeyStroke[] getSaveStatsKeyStrokes() {
+        return new KeyStroke[] {
+                new KeyStroke(KeyType.Enter),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke('a', false, false),
+                new KeyStroke('b', false, false),
+                new KeyStroke('c', false, false),
+                new KeyStroke(KeyType.Tab),
+                new KeyStroke(KeyType.Enter),
+                null, // required to indicate no more input
+
+                new KeyStroke(KeyType.Enter),
+                null // required to indicate no more input
+        };
     }
 }

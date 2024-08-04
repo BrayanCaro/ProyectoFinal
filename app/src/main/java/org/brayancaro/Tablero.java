@@ -7,54 +7,27 @@
 package org.brayancaro;
 
 import java.io.Serializable;
+import java.util.Random;
 
 public abstract class Tablero implements Serializable {
 
     private static final long serialVersionUID = 42l;
     protected Celdas[][] celdas;
 
+    protected Random random;
+
     /**
-     * Metodo para calcular un numero aleatorio entre un intervalo maximo (dado por el parametro) y el 0
-     * @param valorMaximo -- El valor maximo del intervalo
-     * @return int -- El numero aleatorio
+     * Random unsigned integer between 0 and bound (exclusive)
+     * @param int bound Exclusive
      */
-    public int numeroEnteroAleatorio(int valorMaximo) {
-        return (int) (Math.random() * (valorMaximo + 1));
+    protected int randomUnsignedInt(int bound) {
+        return random.nextInt(0, bound);
     }
 
-    /**
-     * Metodo para convertir una tablero a una cadena de caracteres
-     * @return String -- El tablero en formato de cadena
-     */
-    public String toString() {
-        String renglones = " ";
-        for (int w = 0; w < celdas[0].length; w++) {
-            if (w < 10) {
-                renglones += " |" + (w + 1) + "  ";
-            } else {
-                renglones += " |" + (w + 1) + " ";
-            }
-        }
 
-        renglones += "\n ";
-        for (int p = 0; p < celdas[0].length; p++) {
-            renglones += " --- ";
-        }
-        renglones += "\n";
+    public Tablero random(Random random) {
+        this.random = random;
 
-        for (int i = 0; i < celdas.length; i++) {
-            for (int j = 0; j < celdas[0].length; j++) {
-                renglones += " | " + celdas[i][j];
-            }
-            renglones += " | -" + (i + 1) + "\n ";
-            for (int k = 0; k < celdas[0].length; k++) {
-                renglones += " --- ";
-            }
-            if (i == (celdas.length - 1)) {} else {
-                renglones += "\n";
-            }
-        }
-
-        return renglones + "\b\b ";
+        return this;
     }
 }
