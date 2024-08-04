@@ -35,7 +35,7 @@ java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
 
 application {
     // Define the main class for the application.
-    mainClass = "org.brayancaro.Menu"
+    mainClass = "org.brayancaro.App"
 }
 
 tasks.getByName("run", JavaExec::class) {

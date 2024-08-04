@@ -15,7 +15,6 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
@@ -34,8 +33,6 @@ import com.googlecode.lanterna.graphics.SimpleTheme;
 import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.screen.Screen;
-import com.googlecode.lanterna.screen.TerminalScreen;
-import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
 public class Menu {
     public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
@@ -45,20 +42,6 @@ public class Menu {
     protected Screen screen;
 
     protected MultiWindowTextGUI gui;
-
-    public static void main(String[] args) throws IOException {
-        var defaultTerminalFactory = new DefaultTerminalFactory();
-
-        try (var terminal = defaultTerminalFactory.createTerminal();
-                var screen = new TerminalScreen(terminal)) {
-
-            (new Menu())
-                    .random(new SecureRandom())
-                    .screen(screen)
-                    .play();
-        }
-
-    }
 
     public void play() throws IOException {
         screen.startScreen();
