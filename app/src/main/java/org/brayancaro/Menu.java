@@ -100,14 +100,25 @@ public class Menu {
         handleWinningState(board);
     }
 
-    private void showHistory() throws ClassNotFoundException, IOException {
+    protected void showHistory() {
         try {
-            gui.addWindowAndWait(new ListGamesWindow(cargarDatosDeUnArchivo()));
+            gui.addWindowAndWait(new ListGamesWindow(loadStats()));
+        } catch (ClassNotFoundException e) {
+            new MessageDialogBuilder()
+                    .setTitle("Error al cargar el archivo")
+                    .setText("El historial es invalido, favor de eliminarlo")
+                    .build()
+                    .showDialog(gui);
         } catch (FileNotFoundException e) {
             new MessageDialogBuilder()
                     .setTitle("¡Ups!, parece que no has jugado una partida.")
-                    .setText(
-                            "Pero si ya jugaste asegurate de que el archivo \"listaDeTablas.minas\" esta en la misma carpeta.")
+                    .setText("Pero si ya jugaste asegurate de que el archivo \"listaDeTablas.minas\" esta en la misma carpeta.")
+                    .build()
+                    .showDialog(gui);
+        } catch (IOException e) {
+            new MessageDialogBuilder()
+                    .setTitle("Error")
+                    .setText("Hubo un error al cargar el historial")
                     .build()
                     .showDialog(gui);
         }
@@ -201,13 +212,7 @@ public class Menu {
         Files.delete(Paths.get(SAVED_FILE_PATH));
     }
 
-    /**
-     * Metodo para cargar una partida de un archivo
-     *
-     * @param nombreDelArchivo -- Refiere al nombre del archivo que contiene las
-     *                         partidas
-     */
-    public static String[][] cargarDatosDeUnArchivo() throws IOException, ClassNotFoundException {
+    protected String[][] loadStats() throws IOException, ClassNotFoundException {
         try (var stream = new ObjectInputStream(
                 new FileInputStream(SAVED_FILE_PATH))) {
             Menu.datos = (String[][]) stream.readObject();
