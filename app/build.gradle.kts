@@ -29,6 +29,7 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.hibernate.validator)
     implementation(libs.lanterna)
+    implementation(libs.expressly)
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

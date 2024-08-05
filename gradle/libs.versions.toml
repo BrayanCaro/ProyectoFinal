@@ -8,6 +8,7 @@ sonarqube = "4.4.1.3373"
 lanterna = "3.1.2"
 hibernateValidator = "8.0.1.Final"
 mockito = "4.0.0"
+expressly = "5.0.0"
 
 [libraries]
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
@@ -17,6 +18,7 @@ junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref =
 lanterna = { module = "com.googlecode.lanterna:lanterna", version.ref = "lanterna" }
 hibernate-validator = { module = "org.hibernate.validator:hibernate-validator", version.ref = "hibernateValidator" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+expressly = { module = "org.glassfish.expressly:expressly", version.ref = "expressly" }
 
 [plugins]
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
