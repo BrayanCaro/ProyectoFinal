@@ -4,12 +4,12 @@ import java.util.regex.Pattern;
 
 import org.brayancaro.records.menu.Configuration;
 
-import com.googlecode.lanterna.gui2.BasicWindow;
 import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.TextBox;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 
-public class AskUnsignedIntegerWindow extends BasicWindow {
+public class AskUnsignedIntegerWindow extends Window {
 
     protected Configuration configuration;
 
@@ -31,7 +31,17 @@ public class AskUnsignedIntegerWindow extends BasicWindow {
                                     Integer.parseUnsignedInt(rowsTextBox.getText()),
                                     Integer.parseUnsignedInt(columnsTextBox.getText()),
                                     Integer.parseUnsignedInt(bombCountTextBox.getText()));
-                            close();
+
+                            var validatorResults = validator.validate(configuration);
+
+                            if (validatorResults.isEmpty()) {
+                                close();
+                                return;
+                            }
+
+                            MessageDialog.showMessageDialog(getTextGUI(), "Error",
+                                    validatorResults.iterator().next().getMessage());
+
                         })));
     }
 

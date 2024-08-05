@@ -9,8 +9,13 @@ import java.security.SecureRandom;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
+import jakarta.validation.Validation;
+
 public class App {
     public static void main(String[] args) throws IOException {
+        var validatorFactory = Validation.buildDefaultValidatorFactory();
+        var validator = validatorFactory.getValidator();
+
         var defaultTerminalFactory = new DefaultTerminalFactory();
 
         try (var terminal = defaultTerminalFactory.createTerminal();
@@ -19,6 +24,7 @@ public class App {
             (new Menu())
                     .random(new SecureRandom())
                     .screen(screen)
+                    .validator(validator)
                     .play();
         }
 

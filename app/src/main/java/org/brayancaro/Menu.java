@@ -34,6 +34,8 @@ import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.googlecode.lanterna.screen.Screen;
 
+import jakarta.validation.Validator;
+
 public class Menu {
     public static final String SAVED_FILE_PATH = "listaDeTablas.minas";
 
@@ -42,6 +44,8 @@ public class Menu {
     protected Screen screen;
 
     protected MultiWindowTextGUI gui;
+
+    protected Validator validator;
 
     public void play() throws IOException {
         screen.startScreen();
@@ -154,6 +158,7 @@ public class Menu {
 
     protected Configuration askConfiguration() {
         var askConfigWindow = new AskUnsignedIntegerWindow();
+        askConfigWindow.setValidator(validator);
         gui.addWindowAndWait(askConfigWindow);
         return askConfigWindow.getConfiguration();
     }
@@ -227,6 +232,11 @@ public class Menu {
                 TextColor.ANSI.BLACK_BRIGHT,
                 TextColor.ANSI.BLACK));
 
+        return this;
+    }
+
+    public Menu validator(Validator validator) {
+        this.validator = validator;
         return this;
     }
 }
